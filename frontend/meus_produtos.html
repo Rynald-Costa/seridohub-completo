@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meus produtos - SeridóHub</title>
+
+  <!-- Bootstrap 5 -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Ícones -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+  />
+
+  <!-- CSS da aplicação -->
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/home.css" />
+</head>
+
+<body>
+  <!-- header_app.html será injetado aqui -->
+  <div id="site-header"></div>
+
+  <main class="page-wrapper py-4">
+    <div class="container">
+
+      <!-- Título + voltar -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h1 class="h5 mb-0">Meus produtos</h1>
+          <small class="text-muted">
+            Gerencie o catálogo da sua loja: estoque, preço e disponibilidade.
+          </small>
+        </div>
+      </div>
+
+      <div id="produtos-vendedor-alert"></div>
+
+      <!-- Card principal da lista -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+
+          <!-- Header da lista: total + botão novo -->
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+              <h2 class="h6 mb-0">
+                Produtos cadastrados
+                <span id="produtos-vendedor-count" class="small text-muted"></span>
+              </h2>
+            </div>
+
+            <button
+              id="btn-abrir-modal-produto"
+              type="button"
+              class="btn btn-primary btn-sm rounded-pill d-flex align-items-center gap-1"
+              data-bs-toggle="modal"
+              data-bs-target="#produtoModal"
+            >
+              <i class="bi bi-plus-circle"></i>
+              Novo produto
+            </button>
+          </div>
+
+          <!-- BARRA DE BUSCA E FILTROS -->
+          <div class="row g-2 align-items-center mb-3 produtos-filtro-bar">
+            <div class="col-12 col-md-5">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-white border-end-0">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input
+                  type="search"
+                  id="filtro-busca-produto"
+                  class="form-control border-start-0"
+                  placeholder="Buscar por nome ou descrição..."
+                />
+              </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <select
+                id="filtro-categoria-produto"
+                class="form-select form-select-sm"
+              >
+                <option value="">Todas as categorias</option>
+                <!-- opções de categorias carregadas via JS -->
+              </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+              <select
+                id="filtro-status-produto"
+                class="form-select form-select-sm"
+              >
+                <option value="">Todos os status</option>
+                <option value="ativo">Ativos</option>
+                <option value="inativo">Inativos</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-2 text-md-end">
+              <button
+                id="btn-limpar-filtros-produto"
+                type="button"
+                class="btn btn-outline-secondary btn-sm w-100 w-md-auto rounded-pill"
+              >
+                Limpar filtros
+              </button>
+            </div>
+          </div>
+
+          <!-- EMPTY STATE -->
+          <div
+            id="produtos-vendedor-empty"
+            class="alert alert-light border d-flex flex-column flex-md-row align-items-md-center gap-2 small mb-0 d-none"
+          >
+            <div class="me-md-3">
+              <strong>Ainda não há produtos cadastrados.</strong>
+              <span class="d-block mt-1">
+                Comece adicionando o primeiro produto da sua loja. Você poderá definir preço,
+                estoque e se ele estará visível para os clientes.
+              </span>
+            </div>
+            <div class="ms-md-auto">
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm rounded-pill"
+                data-bs-toggle="modal"
+                data-bs-target="#produtoModal"
+              >
+                Cadastrar primeiro produto
+              </button>
+            </div>
+          </div>
+
+          <!-- LISTA DE PRODUTOS -->
+          <div id="produtos-vendedor-list" class="list-group list-group-flush produtos-lista">
+            <!-- Itens serão inseridos via JS.
+                 Estrutura sugerida para cada item (para você seguir no JS):
+                 
+                 <div class="list-group-item produto-item d-flex align-items-center justify-content-between gap-3">
+                   <div class="d-flex align-items-center gap-3">
+                     <div class="produto-thumb rounded">
+                       <img src="..." alt="Nome do produto" />
+                     </div>
+                     <div class="produto-info-texto">
+                       <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                         <strong class="produto-nome">Nome do produto</strong>
+                         <span class="badge bg-light text-muted produto-categoria-badge">Categoria</span>
+                       </div>
+                       <div class="small text-muted produto-descricao">
+                         Descrição curta do produto...
+                       </div>
+                     </div>
+                   </div>
+                   <div class="text-end small produto-info-acoes">
+                     <div>
+                       <span class="text-muted">Preço</span>
+                       <div class="fw-semibold produto-preco">R$ 0,00</div>
+                     </div>
+                     <div class="mt-1">
+                       <span class="text-muted">Estoque</span>
+                       <div class="fw-semibold produto-estoque">0 unid.</div>
+                     </div>
+                     <div class="mt-1">
+                       <span class="badge rounded-pill produto-status-badge bg-success-subtle text-success">
+                         Ativo
+                       </span>
+                     </div>
+                     <div class="mt-2 d-flex justify-content-end gap-1">
+                       <button class="btn btn-outline-secondary btn-sm produto-editar-btn">
+                         Editar
+                       </button>
+                       <button class="btn btn-outline-danger btn-sm produto-remover-btn">
+                         Remover
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+            -->
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <!-- MODAL DE CADASTRO / EDIÇÃO DE PRODUTO -->
+  <div
+    class="modal fade"
+    id="produtoModal"
+    tabindex="-1"
+    aria-labelledby="produtoModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form id="produto-form" novalidate>
+          <div class="modal-header">
+            <h5 class="modal-title" id="produtoModalLabel">Novo produto</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Fechar"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" id="produto-id" />
+
+            <div class="row g-3">
+              <!-- COLUNA ESQUERDA -->
+              <div class="col-12 col-md-7">
+                <div class="mb-2">
+                  <label class="form-label small" for="produto-nome">
+                    Nome do produto
+                  </label>
+                  <input
+                    type="text"
+                    id="produto-nome"
+                    class="form-control form-control-sm"
+                    placeholder="Ex: Arroz Branco 1kg"
+                    required
+                  />
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label small" for="produto-descricao">
+                    Descrição
+                  </label>
+                  <textarea
+                    id="produto-descricao"
+                    class="form-control form-control-sm"
+                    rows="3"
+                    placeholder="Detalhes do produto, marca, peso, etc."
+                  ></textarea>
+                </div>
+
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label class="form-label small" for="produto-preco">
+                      Preço (R$)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      id="produto-preco"
+                      class="form-control form-control-sm"
+                      placeholder="Ex: 7,50"
+                      required
+                    />
+                  </div>
+
+                  <div class="col-6">
+                    <label class="form-label small" for="produto-estoque">
+                      Estoque (unidades)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      id="produto-estoque"
+                      class="form-control form-control-sm"
+                      placeholder="Ex: 10"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- COLUNA DIREITA -->
+              <div class="col-12 col-md-5">
+                <div class="mb-2">
+                  <label class="form-label small" for="produto-categoria">
+                    Categoria
+                  </label>
+                  <select
+                    id="produto-categoria"
+                    class="form-select form-select-sm"
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    <!-- opções serão carregadas via JS com base em id_categoria -->
+                  </select>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label small" for="produto-imagem">
+                    URL da imagem do produto
+                  </label>
+                  <input
+                    type="url"
+                    id="produto-imagem"
+                    class="form-control form-control-sm"
+                    placeholder="https://exemplo.com/produto.png"
+                  />
+                  <small class="text-muted">
+                    Essa será a imagem principal exibida para o cliente.
+                  </small>
+                </div>
+
+                <!-- mini preview da imagem -->
+                <div class="mt-3">
+                  <label class="form-label small">Pré-visualização do produto</label>
+                  <div class="product-preview-box">
+                    <div class="product-preview-inner">
+                      <img
+                        id="produto-preview-img"
+                        class="product-preview-img d-none"
+                        src=""
+                        alt="Pré-visualização do produto"
+                      />
+                      <span
+                        id="produto-preview-placeholder"
+                        class="product-preview-placeholder"
+                      >
+                        Cole a URL da imagem para ver a prévia aqui.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-3">
+                  <div class="form-check form-switch">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="produto-ativo"
+                      checked
+                    />
+                    <label class="form-check-label small" for="produto-ativo">
+                      Produto ativo (visível para os clientes)
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="produto-error" class="text-danger small mt-2"></div>
+            <div id="produto-success" class="text-success small mt-1"></div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm rounded-pill"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary btn-sm rounded-pill px-4"
+            >
+              Salvar produto
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- header/footer + carrinho + autenticação -->
+  <script src="js/layout.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/meus_produtos.js"></script>
+
+  <!-- Preview da imagem do produto no modal -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const urlInput = document.getElementById("produto-imagem");
+      const img = document.getElementById("produto-imagem-preview");
+      const placeholder = document.getElementById("produto-imagem-placeholder");
+
+      if (!urlInput || !img || !placeholder) return;
+
+      const clearPreview = () => {
+        img.src = "";
+        img.classList.add("d-none");
+        placeholder.classList.remove("d-none");
+      };
+
+      const updatePreview = () => {
+        const url = (urlInput.value || "").trim();
+        if (!url) {
+          clearPreview();
+          return;
+        }
+        img.src = url;
+      };
+
+      urlInput.addEventListener("blur", updatePreview);
+      urlInput.addEventListener("change", updatePreview);
+      urlInput.addEventListener("input", function () {
+        if (!this.value.trim()) {
+          clearPreview();
+        }
+      });
+
+      img.addEventListener("error", clearPreview);
+
+      img.addEventListener("load", function () {
+        if (!img.naturalWidth) {
+          clearPreview();
+        } else {
+          img.classList.remove("d-none");
+          placeholder.classList.add("d-none");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+/* frontend/css/lojas.css */
+
+:root {
+  --primary: #4d8dff;
+  --primary-soft: #e4efff;
+  --bg-soft: #f5f7fb;
+  --text-muted: #6c757d;
+  --card-radius: 18px;
+}
+
+body {
+  background: radial-gradient(circle at top left, #eef3ff 0, #fdfdff 40%, #f4f6fb 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-wrapper {
+  padding-top: 6rem; /* espaço para o header_app */
+  padding-bottom: 3rem;
+  flex: 1 0 auto;
+}
+
+/* HERO */
+.stores-hero {
+  background: linear-gradient(135deg, #4d8dff, #6d5bff);
+  border-radius: 24px;
+  padding: 2rem 2.5rem;
+  color: #fff;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.16);
+}
+
+.stores-hero-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-right: 1.25rem;
+}
+
+.stores-hero h1 {
+  font-size: 1.9rem;
+  margin-bottom: 0.35rem;
+}
+
+/* BADGES */
+.badge-open {
+  background-color: #32c48d;
+}
+
+.badge-closed {
+  background-color: #ff6f6f;
+}
+
+.badge-soon {
+  background-color: #ffc857;
+  color: #2b2b2b;
+}
+
+/* CARDS */
+.store-card {
+  border-radius: var(--card-radius);
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(41, 51, 86, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.store-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(41, 51, 86, 0.16);
+}
+
+.store-logo-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.store-logo-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.store-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.store-description {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-height: 3.2em;
+  overflow: hidden;
+}
+
+.store-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.store-meta i {
+  font-size: 0.9rem;
+  margin-right: 0.25rem;
+}
+
+.btn-view-store {
+  border-radius: 999px;
+  padding-inline: 1.4rem;
+  font-weight: 500;
+}
+
+/* SEARCH BOX */
+.search-card {
+  border-radius: var(--card-radius);
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(41, 51, 86, 0.08);
+  margin-top: -1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.search-input::placeholder {
+  color: #a0a7b5;
+  font-size: 0.92rem;
+}
+
+/* footer fixo no fim */
+footer {
+  flex-shrink: 0;
+}
+
+@media (max-width: 576px) {
+  .page-wrapper {
+    padding-top: 7rem;
+  }
+  .stores-hero {
+    padding: 1.5rem 1.4rem;
+  }
+  .stores-hero h1 {
+    font-size: 1.6rem;
+  }
+}

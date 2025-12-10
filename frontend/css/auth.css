@@ -1,0 +1,61 @@
+/* frontend/css/auth.css */
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #fffaf0; /* fundo creme, bem claro */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  /* mantém header em cima e footer no fim da tela */
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* imagem de logo no header (classe usada no header_public) */
+.logo-header-img {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* card da tela de login */
+.login-card {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* card da tela de cadastro */
+.cadastro-card {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* círculo com a logo grande à direita */
+.promo-logo {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  border: 4px solid var(--bs-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: 0 auto 1rem;
+  background-color: #fff;
+}
+
+.promo-logo img {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+}

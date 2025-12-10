@@ -1,0 +1,188 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/* ============================================================
+   ENUMS
+   ============================================================ */
+
+enum UserType {
+  CLIENTE
+  VENDEDOR
+  ADMIN
+}
+
+enum LojaStatus {
+  PENDENTE   @map("pendente")
+  APROVADA   @map("aprovada")
+  INATIVA    @map("inativa")
+}
+
+enum StatusPedido {
+  PENDENTE
+  PREPARO
+  A_CAMINHO
+  ENTREGUE
+  CANCELADO
+}
+
+enum FormaPagamento {
+  PIX
+  CARTAO
+  DINHEIRO
+}
+
+/* ============================================================
+   MODEL: USUARIOS
+   ============================================================ */
+
+model Usuario {
+  id          Int       @id @default(autoincrement())
+  nome        String    @db.VarChar(100)
+  email       String    @unique @db.VarChar(120)
+  senha       String    @db.VarChar(255)
+  telefone    String?   @db.VarChar(20)
+  tipo        UserType  @default(CLIENTE)
+
+  status      Boolean   @default(true)
+
+  dataCriacao DateTime  @map("data_criacao") @default(now())
+
+  // Relação 1:1 — um vendedor só pode ter 1 loja
+  loja        Loja?
+
+  // Relação 1:N — um cliente pode ter vários pedidos
+  pedidos     Pedido[]  @relation("UsuarioPedidos")
+
+  @@map("usuarios")
+}
+
+/* ============================================================
+   MODEL: LOJAS
+   ============================================================ */
+
+model Loja {
+  id                Int         @id @default(autoincrement())
+  nome              String      @db.VarChar(120)
+  descricao         String?
+
+  usuarioId         Int         @unique @map("id_vendedor")
+
+  endereco          String?     @db.VarChar(255)
+  telefone          String?     @db.VarChar(20)
+
+  imagemLogo        String?     @map("imagem_logo") @db.VarChar(255)
+
+  status            LojaStatus  @default(PENDENTE)
+
+  horarioAbertura   DateTime?   @map("horario_abertura") @db.Time
+  horarioFechamento DateTime?   @map("horario_fechamento") @db.Time
+
+  dataCriacao       DateTime    @map("data_criacao") @default(now())
+
+  // Relacionamento com usuário (vendedor)
+  dono Usuario @relation(fields: [usuarioId], references: [id])
+
+  // Relacionamento com produtos
+  produtos Produto[]
+
+  @@map("lojas")
+}
+
+/* ============================================================
+   MODEL: CATEGORIAS  (NOVO)
+   ============================================================ */
+
+model Categoria {
+  id       Int       @id @default(autoincrement())
+  nome     String    @db.VarChar(120)
+
+  produtos Produto[]
+
+  @@map("categorias")
+}
+
+/* ============================================================
+   MODEL: PRODUTOS
+   ============================================================ */
+
+model Produto {
+  id        Int      @id @default(autoincrement())
+  nome      String   @db.VarChar(100)
+  descricao String?
+  preco     Decimal  @db.Decimal(10, 2)
+
+  // imagem principal exibida para o cliente
+  imagemUrl String?  @map("imagem_principal") @db.VarChar(255)
+
+  // quantidade disponível em estoque
+  estoque   Int      @default(0)
+
+  // se o produto está ativo/visível para os clientes
+  ativo     Boolean  @default(true)
+
+  // data de cadastro do produto
+  dataCriacao DateTime @map("data_cadastro") @default(now())
+
+  // 🔹 NOVO: categoria do produto (FK opcional)
+  idCategoria Int?        @map("id_categoria")
+  categoria   Categoria?  @relation(fields: [idCategoria], references: [id])
+
+  // loja dona do produto
+  lojaId    Int
+  loja      Loja     @relation(fields: [lojaId], references: [id])
+
+  itensPedido ItemPedido[]
+
+  @@map("produtos")
+}
+
+/* ============================================================
+   MODEL: PEDIDOS
+   ============================================================ */
+
+model Pedido {
+  id              Int            @id @default(autoincrement())
+
+  dataCriacao     DateTime       @map("data_criacao") @default(now())
+
+  status          StatusPedido   @default(PENDENTE)
+  formaPagamento  FormaPagamento
+
+  enderecoEntrega String         @map("endereco_entrega")
+
+  valorTotal      Decimal        @db.Decimal(10, 2)
+
+  clienteId       Int
+  cliente         Usuario        @relation("UsuarioPedidos", fields: [clienteId], references: [id])
+
+  itens           ItemPedido[]
+
+  @@map("pedidos")
+}
+
+/* ============================================================
+   MODEL: ITENS DO PEDIDO
+   ============================================================ */
+
+model ItemPedido {
+  id            Int       @id @default(autoincrement())
+  quantidade    Int
+  precoUnitario Decimal   @db.Decimal(10, 2)
+  subtotal      Decimal   @db.Decimal(10, 2)
+
+  pedidoId      Int
+  pedido        Pedido    @relation(fields: [pedidoId], references: [id])
+
+  produtoId     Int
+  produto       Produto   @relation(fields: [produtoId], references: [id])
+
+  @@map("itens_pedido")
+}

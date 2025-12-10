@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "produtos" ADD COLUMN     "ativo" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "data_cadastro" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

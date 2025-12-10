@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minha conta - SeridóHub</title>
+
+  <!-- Bootstrap 5 -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+  />
+
+  <!-- CSS da aplicação -->
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/conta.css" />
+</head>
+<body>
+  <!-- HEADER -->
+  <div id="site-header"></div>
+
+  <main class="bg-light-subtle min-vh-100">
+    <div class="container py-4 py-md-5">
+      <!-- Visitante (não logado) -->
+      <section id="sec-conta-visitante" class="d-none">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-8 col-lg-6">
+            <div class="card conta-card shadow-sm">
+              <div class="card-body text-center py-5">
+                <div class="mb-3">
+                  <i class="bi bi-person-circle fs-1 text-warning"></i>
+                </div>
+                <h1 class="h4 mb-2">Você ainda não está logado</h1>
+                <p class="text-muted mb-4">
+                  Para acessar sua conta, acompanhar pedidos e gerenciar seus dados,
+                  faça login ou crie uma conta no SeridóHub.
+                </p>
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                  <a href="login.html" class="btn btn-primary rounded-pill px-4">
+                    Entrar
+                  </a>
+                  <a href="cadastro.html" class="btn btn-outline-dark rounded-pill px-4">
+                    Criar conta
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Usuário logado -->
+      <section id="sec-conta-logado" class="d-none">
+        <div class="row g-4">
+          <!-- Coluna esquerda: resumo -->
+          <div class="col-12 col-lg-4">
+            <div class="card conta-card shadow-sm mb-3">
+              <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  <div class="conta-avatar-placeholder">
+                    <span id="conta-avatar-initial">U</span>
+                  </div>
+                  <div>
+                    <p class="text-uppercase small text-muted mb-1">
+                      Perfil
+                    </p>
+                    <h2 class="h5 mb-0" id="conta-nome">Usuário</h2>
+                    <span class="badge rounded-pill bg-success-subtle text-success-emphasis mt-1" id="conta-tipo-badge">
+                      Cliente
+                    </span>
+                  </div>
+                </div>
+
+                <div class="mb-2">
+                  <small class="text-uppercase text-muted d-block">E-mail</small>
+                  <span id="conta-email">email@exemplo.com</span>
+                </div>
+                <div class="mb-2">
+                  <small class="text-uppercase text-muted d-block">Telefone</small>
+                  <span id="conta-telefone">Não informado</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Atalhos rápidos -->
+            <div class="card conta-card shadow-sm">
+              <div class="card-body">
+                <p class="text-uppercase small text-muted mb-2">
+                  Atalhos rápidos
+                </p>
+                <div class="list-group list-group-flush conta-atalhos-lista">
+                  <a href="pedidos.html" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <i class="bi bi-box-seam me-2"></i>
+                    <span>Meus pedidos</span>
+                  </a>
+                  <a href="carrinho.html" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <i class="bi bi-cart3 me-2"></i>
+                    <span>Meu carrinho</span>
+                  </a>
+                  <!-- mostrado só se for vendedor via JS -->
+                  <a href="minha_loja.html" class="list-group-item list-group-item-action d-flex align-items-center d-none" id="conta-atalho-minha-loja">
+                    <i class="bi bi-shop-window me-2"></i>
+                    <span>Minha loja / painel do vendedor</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna direita: formulários e ações -->
+          <div class="col-12 col-lg-8">
+            <!-- Dados básicos -->
+            <div class="card conta-card shadow-sm mb-3">
+              <div class="card-body">
+                <h2 class="h5 mb-1">Dados da conta</h2>
+                <p class="text-muted small mb-4">
+                  Veja e edite algumas informações do seu perfil.
+                </p>
+
+                <!-- Atualizar telefone -->
+                <form id="form-telefone" class="row g-3 align-items-end mb-3">
+                  <div class="col-sm-8">
+                    <label for="input-telefone" class="form-label small text-muted mb-1">
+                      Telefone
+                    </label>
+                    <input
+                      type="tel"
+                      class="form-control"
+                      id="input-telefone"
+                      placeholder="(84) 99999-0000"
+                    />
+                  </div>
+                  <div class="col-sm-4 d-grid">
+                    <button type="submit" class="btn btn-outline-primary rounded-pill">
+                      Atualizar telefone
+                    </button>
+                  </div>
+                </form>
+
+                <!-- Atualizar e-mail (somente visual / demo por enquanto) -->
+                <form id="form-email" class="row g-3 align-items-end mb-3">
+                  <div class="col-sm-8">
+                    <label for="input-email" class="form-label small text-muted mb-1">
+                      E-mail
+                    </label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="input-email"
+                      placeholder="email@exemplo.com"
+                    />
+                  </div>
+                  <div class="col-sm-4 d-grid">
+                    <button type="submit" class="btn btn-outline-primary rounded-pill">
+                      Atualizar e-mail
+                    </button>
+                  </div>
+                </form>
+
+                <!-- Alterar senha (somente front, integração futura) -->
+                <form id="form-senha" class="row g-3 align-items-end">
+                  <div class="col-sm-6">
+                    <label for="input-senha-atual" class="form-label small text-muted mb-1">
+                      Senha atual
+                    </label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="input-senha-atual"
+                    />
+                  </div>
+                  <div class="col-sm-6">
+                    <label for="input-senha-nova" class="form-label small text-muted mb-1">
+                      Nova senha
+                    </label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="input-senha-nova"
+                    />
+                  </div>
+                  <div class="col-12 col-sm-4 col-md-3 mt-2">
+                    <button type="submit" class="btn btn-outline-secondary w-100 rounded-pill">
+                      Alterar senha
+                    </button>
+                  </div>
+                  <div class="col-12 col-sm-8 col-md-9 mt-2">
+                    <small class="text-muted">
+                      Esta funcionalidade depende da API de atualização de senha e pode estar em desenvolvimento.
+                    </small>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Encerrar conta -->
+            <div class="card conta-card shadow-sm">
+              <div class="card-body">
+                <h2 class="h5 text-danger mb-1">Encerrar conta</h2>
+                <p class="text-muted small mb-3">
+                  Ao excluir sua conta, você perderá acesso ao histórico de pedidos e aos dados salvos.
+                  Esta ação é permanente e não pode ser desfeita.
+                </p>
+                <button type="button" class="btn btn-outline-danger rounded-pill" id="btn-excluir-conta">
+                  Excluir minha conta
+                </button>
+                <small class="d-block text-muted mt-2">
+                  A exclusão real da conta depende de uma rota específica na API.
+                  Nesta versão, a ação será apenas simulada no frontend (logout + limpeza de dados locais).
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <div id="site-footer"></div>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="js/layout.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/conta.js"></script>
+</body>
+</html>
