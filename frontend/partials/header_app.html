@@ -1,9 +1,6 @@
-<!-- frontend/partials/header_app.html -->
 
 <header class="serido-header shadow-sm">
-  <!-- Barra principal -->
   <div class="container py-2 d-flex align-items-center gap-3">
-    <!-- Logo -->
     <a href="index.html" class="d-flex align-items-center text-decoration-none">
       <img
         src="assets/logo.svg"
@@ -12,8 +9,6 @@
       />
     </a>
 
-    <!-- Campo de busca (DESKTOP) -->
-    <!-- AGORA ENVIA PARA busca.html COM ?q=TERMO -->
     <form
       id="header-search-form"
       class="flex-grow-1 d-none d-md-flex"
@@ -23,7 +18,7 @@
     >
       <div class="input-group search-input-group">
         <button
-          class="btn btn-light border-0 border-end dropdown-toggle"
+          class="btn btn-light border-0 border-end"
           type="button"
         >
           Todos
@@ -42,7 +37,6 @@
       </div>
     </form>
 
-    <!-- Versão mobile: busca vira ícone -->
     <button
       class="btn btn-light d-flex d-md-none align-items-center"
       type="button"
@@ -53,15 +47,12 @@
       <i class="bi bi-search"></i>
     </button>
 
-    <!-- Área de usuário e atalhos -->
     <div class="d-flex align-items-center gap-3 ms-auto">
-      <!-- Conta / login -->
       <a
         href="login.html"
         class="text-dark text-decoration-none small"
         id="header-user-link"
       >
-        <!-- bolinha (visível no modo vendedor) -->
         <span class="header-round-icon">
           <i class="bi bi-person"></i>
         </span>
@@ -70,13 +61,11 @@
         <strong id="header-user-action">Entre ou cadastre-se</strong>
       </a>
 
-      <!-- Link Minha Loja (mostrado só para vendedor pelo JS) -->
       <a
         href="minha_loja.html"
         class="text-dark text-decoration-none small d-none"
         id="header-seller-link"
       >
-        <!-- bolinha (visível no modo vendedor) -->
         <span class="header-round-icon">
           <i class="bi bi-shop-window"></i>
         </span>
@@ -85,9 +74,8 @@
         <strong>Minha loja</strong>
       </a>
 
-      <!-- Pedidos / devoluções (padrão para cliente/visitante, some no vendedor) -->
       <a
-        href="pedidos.html"
+        href="meus_pedidos.html"
         class="text-dark text-decoration-none d-none d-md-block small"
         id="header-orders-link"
       >
@@ -95,7 +83,6 @@
         <strong>e pedidos</strong>
       </a>
 
-      <!-- Carrinho (padrão para cliente/visitante, some no vendedor) -->
       <a
         href="carrinho.html"
         class="text-dark text-decoration-none position-relative serido-header-cart-link"
@@ -109,7 +96,6 @@
         </span>
       </a>
 
-      <!-- Logout (apenas modo vendedor) -->
       <a
         href="#"
         class="text-dark text-decoration-none d-none"
@@ -122,12 +108,10 @@
     </div>
   </div>
 
-  <!-- Barra de navegação secundária (categorias / links rápidos) -->
   <div class="border-top border-warning-subtle" id="header-secondary-nav">
     <div
       class="container d-flex flex-wrap align-items-center gap-3 py-1 small nav-secondary"
     >
-      <!-- BOTÃO "TODOS" AGORA ABRE O MENU LATERAL -->
       <button
         class="btn btn-link text-dark text-decoration-none p-0 d-flex align-items-center"
         type="button"
@@ -143,22 +127,9 @@
       <a href="lojas.html" class="text-dark text-decoration-none">
         Lojas
       </a>
-      <a href="categorias.html" class="text-dark text-decoration-none">
-        Categorias
-      </a>
-      <a href="ofertas.html" class="text-dark text-decoration-none">
-        Ofertas
-      </a>
-      <a href="supermercado.html" class="text-dark text-decoration-none">
-        Mercado
-      </a>
-      <a href="favoritos.html" class="text-dark text-decoration-none">
-        Favoritos
-      </a>
     </div>
   </div>
 
-  <!-- MENU LATERAL (OFFCANVAS) PRINCIPAL -->
   <div
     class="offcanvas offcanvas-start serido-offcanvas"
     tabindex="-1"
@@ -186,7 +157,6 @@
     </div>
 
     <div class="offcanvas-body d-flex flex-column">
-      <!-- Acesso rápido -->
       <nav class="mb-3" aria-label="Menu principal">
         <p class="text-uppercase small text-muted mb-2">Acesso rápido</p>
         <div class="list-group serido-menu-list">
@@ -198,33 +168,13 @@
             <i class="bi bi-shop me-2"></i>
             <span>Lojas</span>
           </a>
-          <a href="categorias.html" class="list-group-item serido-menu-item">
-            <i class="bi bi-grid-3x3-gap me-2"></i>
-            <span>Categorias</span>
-          </a>
-          <a href="ofertas.html" class="list-group-item serido-menu-item">
-            <i class="bi bi-lightning-charge me-2"></i>
-            <span>Ofertas</span>
-          </a>
-          <a
-            href="supermercado.html"
-            class="list-group-item serido-menu-item"
-          >
-            <i class="bi bi-basket me-2"></i>
-            <span>Mercado</span>
-          </a>
-          <a href="favoritos.html" class="list-group-item serido-menu-item">
-            <i class="bi bi-heart me-2"></i>
-            <span>Favoritos</span>
-          </a>
         </div>
       </nav>
 
-      <!-- Minha conta -->
       <nav class="mb-3" aria-label="Minha conta">
         <p class="text-uppercase small text-muted mb-2">Minha conta</p>
         <div class="list-group serido-menu-list">
-          <a href="pedidos.html" class="list-group-item serido-menu-item">
+          <a href="meus_pedidos.html" class="list-group-item serido-menu-item">
             <i class="bi bi-box-seam me-2"></i>
             <span>Meus pedidos</span>
           </a>
@@ -247,22 +197,6 @@
         </div>
       </nav>
 
-      <!-- Ajuda -->
-      <nav class="mb-3" aria-label="Ajuda">
-        <p class="text-uppercase small text-muted mb-2">Ajuda</p>
-        <div class="list-group serido-menu-list">
-          <a href="ajuda.html" class="list-group-item serido-menu-item">
-            <i class="bi bi-question-circle me-2"></i>
-            <span>Central de ajuda</span>
-          </a>
-          <a href="contato.html" class="list-group-item serido-menu-item">
-            <i class="bi bi-chat-dots me-2"></i>
-            <span>Fale conosco</span>
-          </a>
-        </div>
-      </nav>
-
-      <!-- Rodapé do menu -->
       <div class="mt-auto pt-3 border-top">
         <button
           type="button"
@@ -278,7 +212,6 @@
     </div>
   </div>
 
-  <!-- Modal de busca (mobile) -->
   <div
     class="modal fade"
     id="modalBusca"
@@ -298,7 +231,6 @@
           ></button>
         </div>
         <div class="modal-body">
-          <!-- FORM MOBILE TAMBÉM ENVIA PARA busca.html -->
           <form
             id="header-search-form-mobile"
             role="search"

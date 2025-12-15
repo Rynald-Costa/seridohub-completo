@@ -1,10 +1,7 @@
-/* frontend/css/global.css */
-
-/* HEADER PÚBLICO (login/cadastro etc.) */
 .serido-header-public {
   padding-top: 0.6rem;
   padding-bottom: 0.6rem;
-  background-color: #ffc107; /* bg-warning */
+  background-color: #ffc107;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
@@ -15,20 +12,18 @@
   display: block;
 }
 
-/* HEADER APP (interno, usuário logado) */
-
 .serido-header {
   padding-top: 0.4rem;
   padding-bottom: 0.4rem;
-  background-color: #ffc107; /* bg-warning */
+  background-color: #ffc107;
 }
 
 .serido-header .logo-header-img {
-  height: 80px; /* antes: 48px */
+  height: 80px;
   width: auto;
   object-fit: contain;
   display: block;
-  margin-top: -4px; /* opcional: centraliza verticalmente */
+  margin-top: -4px;
 }
 
 .serido-header .logo-header-img:hover {
@@ -36,19 +31,14 @@
   transition: opacity 0.2s ease-in-out;
 }
 
-/* Utilitário para esconder itens do header (usado apenas em vendedor) */
 .header-hidden {
   display: none !important;
 }
 
-/* --------- Modo vendedor: bolinhas de conta/loja/logout ---------- */
-
-/* por padrão, não mostra o "círculo" para cliente/visitante */
 .serido-header .header-round-icon {
   display: none;
 }
 
-/* apenas no modo vendedor as âncoras viram bolinhas alinhadas */
 .serido-header.seller-mode #header-user-link,
 .serido-header.seller-mode #header-seller-link,
 .serido-header.seller-mode #header-logout-link {
@@ -59,7 +49,6 @@
   text-align: center;
 }
 
-/* círculo base */
 .serido-header.seller-mode .header-round-icon {
   display: flex;
   align-items: center;
@@ -77,14 +66,12 @@
   font-size: 1.1rem;
 }
 
-/* hover nas bolinhas padrão */
 .serido-header.seller-mode #header-user-link:hover .header-round-icon,
 .serido-header.seller-mode #header-seller-link:hover .header-round-icon {
   box-shadow: 0 0 0 2px rgba(33, 37, 41, 0.25);
   transform: translateY(-1px);
 }
 
-/* Logout em destaque (vermelho) */
 .serido-header.seller-mode .header-logout-icon {
   background: #dc3545;
   color: #ffffff;
@@ -97,7 +84,6 @@
   transform: translateY(-1px);
 }
 
-/* no modo vendedor, nenhum texto visível nos atalhos do topo */
 .serido-header.seller-mode #header-user-greeting,
 .serido-header.seller-mode #header-user-action,
 .serido-header.seller-mode .header-seller-label,
@@ -105,7 +91,6 @@
   display: none !important;
 }
 
-/* Input de busca desktop */
 .serido-header .search-input-group .form-control {
   border-radius: 0;
   box-shadow: none;
@@ -123,7 +108,6 @@
   border-radius: 999px 0 0 999px;
 }
 
-/* Links da barra secundária */
 .serido-header .nav-secondary a,
 .serido-header .nav-secondary button {
   font-weight: 500;
@@ -134,13 +118,10 @@
   text-decoration: underline;
 }
 
-/* Badge do carrinho */
 .serido-header #cart-count-badge {
   font-size: 0.65rem;
   min-width: 18px;
 }
-
-/* ============== MENU LATERAL (OFFCANVAS) ============== */
 
 .serido-offcanvas {
   max-width: 320px;

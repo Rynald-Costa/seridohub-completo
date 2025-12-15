@@ -1,23 +1,59 @@
-// src/controllers/PedidoController.ts
 import { Request, Response } from 'express';
 import { PedidoService } from '../services/PedidoService';
 
-class PedidoController {
-  // Lista pedidos das lojas do vendedor logado
-  async listByVendedor(req: Request, res: Response) {
-    try {
-      // 👇 aceita tanto req.usuario quanto req.user
-      const usuario = (req as any).usuario || (req as any).user;
+const STATUS_PERMITIDOS = new Set([
+  'PENDENTE',
+  'PREPARO',
+  'A_CAMINHO',
+  'ENTREGUE',
+  'CANCELADO',
+]);
 
-      if (!usuario || !usuario.id) {
+function getUsuario(req: Request) {
+  return (req as any).usuario || (req as any).user;
+}
+
+function normalizeStatus(status: any) {
+  if (!status) return null;
+  return String(status).trim().toUpperCase();
+}
+
+class PedidoController {
+  async listByCliente(req: Request, res: Response) {
+    try {
+      const usuario = getUsuario(req);
+
+      if (!usuario?.id) {
         return res.status(401).json({ message: 'Usuário não autenticado.' });
       }
 
-      const vendedorId = Number(usuario.id);
-      const pedidos = await PedidoService.listarPedidosPorVendedor(vendedorId);
+      const pedidos = await PedidoService.listarPedidosPorCliente(Number(usuario.id));
 
       if (!pedidos || pedidos.length === 0) {
-        // 204 = sem conteúdo (front trata como "sem pedidos")
+        return res.status(204).send();
+      }
+
+      return res.json(pedidos);
+    } catch (error: any) {
+      console.error('Erro ao listar pedidos do cliente:', error);
+      return res.status(500).json({
+        message: 'Erro ao listar pedidos do cliente.',
+        error: error.message || String(error),
+      });
+    }
+  }
+
+  async listByVendedor(req: Request, res: Response) {
+    try {
+      const usuario = getUsuario(req);
+
+      if (!usuario?.id) {
+        return res.status(401).json({ message: 'Usuário não autenticado.' });
+      }
+
+      const pedidos = await PedidoService.listarPedidosPorVendedor(Number(usuario.id));
+
+      if (!pedidos || pedidos.length === 0) {
         return res.status(204).send();
       }
 
@@ -31,13 +67,12 @@ class PedidoController {
     }
   }
 
-  // Detalhes de um pedido específico
   async getById(req: Request, res: Response) {
     try {
-      const usuario = (req as any).usuario || (req as any).user;
+      const usuario = getUsuario(req);
       const pedidoId = Number(req.params.id);
 
-      if (!usuario || !usuario.id) {
+      if (!usuario?.id) {
         return res.status(401).json({ message: 'Usuário não autenticado.' });
       }
 
@@ -45,9 +80,10 @@ class PedidoController {
         return res.status(400).json({ message: 'ID de pedido inválido.' });
       }
 
-      const pedido = await PedidoService.buscarPorIdParaVendedor({
+      const pedido = await PedidoService.buscarPorIdParaUsuario({
         pedidoId,
-        vendedorId: Number(usuario.id),
+        usuarioId: Number(usuario.id),
+        userType: usuario.tipo,
       });
 
       if (!pedido) {
@@ -57,6 +93,11 @@ class PedidoController {
       return res.json(pedido);
     } catch (error: any) {
       console.error('Erro ao buscar pedido:', error);
+
+      if (error?.code === 'FORBIDDEN') {
+        return res.status(403).json({ message: 'Você não tem permissão para ver este pedido.' });
+      }
+
       return res.status(500).json({
         message: 'Erro ao buscar pedido.',
         error: error.message || String(error),
@@ -64,14 +105,13 @@ class PedidoController {
     }
   }
 
-  // Atualizar status de um pedido
   async updateStatus(req: Request, res: Response) {
     try {
-      const usuario = (req as any).usuario || (req as any).user;
+      const usuario = getUsuario(req);
       const pedidoId = Number(req.params.id);
-      const { status } = req.body;
+      const status = normalizeStatus(req.body?.status);
 
-      if (!usuario || !usuario.id) {
+      if (!usuario?.id) {
         return res.status(401).json({ message: 'Usuário não autenticado.' });
       }
 
@@ -81,6 +121,13 @@ class PedidoController {
 
       if (!status) {
         return res.status(400).json({ message: 'Status é obrigatório.' });
+      }
+
+      if (!STATUS_PERMITIDOS.has(status)) {
+        return res.status(400).json({
+          message: 'Status inválido.',
+          allowed: Array.from(STATUS_PERMITIDOS),
+        });
       }
 
       const pedidoAtualizado = await PedidoService.atualizarStatus({
@@ -93,12 +140,58 @@ class PedidoController {
     } catch (error: any) {
       console.error('Erro ao atualizar status do pedido:', error);
 
-      if (error.code === 'FORBIDDEN') {
+      if (error?.code === 'FORBIDDEN') {
         return res.status(403).json({ message: 'Você não pode alterar este pedido.' });
+      }
+
+      if (error?.code === 'NOT_FOUND') {
+        return res.status(404).json({ message: 'Pedido não encontrado.' });
       }
 
       return res.status(500).json({
         message: 'Erro ao atualizar status do pedido.',
+        error: error.message || String(error),
+      });
+    }
+  }
+
+  async cancelar(req: Request, res: Response) {
+    try {
+      const usuario = getUsuario(req);
+      const pedidoId = Number(req.params.id);
+
+      if (!usuario?.id) {
+        return res.status(401).json({ message: 'Usuário não autenticado.' });
+      }
+
+      if (Number.isNaN(pedidoId)) {
+        return res.status(400).json({ message: 'ID de pedido inválido.' });
+      }
+
+      const pedidoCancelado = await PedidoService.cancelarPedido({
+        pedidoId,
+        usuarioId: Number(usuario.id),
+        userType: usuario.tipo,
+      });
+
+      return res.json(pedidoCancelado);
+    } catch (error: any) {
+      console.error('Erro ao cancelar pedido:', error);
+
+      if (error?.code === 'FORBIDDEN') {
+        return res.status(403).json({ message: error.message || 'Sem permissão.' });
+      }
+
+      if (error?.code === 'NOT_FOUND') {
+        return res.status(404).json({ message: 'Pedido não encontrado.' });
+      }
+
+      if (error?.code === 'NOT_ALLOWED') {
+        return res.status(409).json({ message: error.message });
+      }
+
+      return res.status(500).json({
+        message: 'Erro ao cancelar pedido.',
         error: error.message || String(error),
       });
     }

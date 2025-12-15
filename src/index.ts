@@ -1,4 +1,3 @@
-// src/index.ts
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -7,21 +6,22 @@ import routes from './routes';
 
 const app = express();
 
-app.use(cors()); // em dev, libera tudo; se quiser, depois restringe
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// opcional: servir o frontend pela API
+app.use('/api', routes);
+
+app.get('/api/health', (_req, res) => {
+  res.json({ ok: true });
+});
+
 app.use(
   express.static(path.join(__dirname, '../frontend'), {
     extensions: ['html'],
   })
 );
 
-// rotas da API
-app.use('/api', routes);
-
-// home -> index.html do frontend
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });

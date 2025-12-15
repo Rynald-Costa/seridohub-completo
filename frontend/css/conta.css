@@ -1,11 +1,8 @@
-/* frontend/css/conta.css */
-
 .conta-card {
   border-radius: 18px;
   border: 1px solid rgba(15, 23, 42, 0.05);
 }
 
-/* avatar circular com inicial do nome */
 .conta-avatar-placeholder {
   width: 64px;
   height: 64px;
@@ -19,7 +16,6 @@
   color: #8b5c00;
 }
 
-/* lista de atalhos da conta */
 .conta-atalhos-lista .list-group-item {
   border: 0;
   padding-left: 0;

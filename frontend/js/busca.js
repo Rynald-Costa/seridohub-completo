@@ -1,6 +1,3 @@
-// frontend/js/busca.js
-
-// Mesma base usada no resto do projeto (ex: lojas.js)
 const API_BASE_URL = 'http://localhost:3000/api';
 
 function getSearchTerm() {
@@ -29,8 +26,6 @@ function formatCurrency(value) {
   });
 }
 
-/* ---------- Criação dos cards ---------- */
-
 function createLojaCard(loja) {
   const col = document.createElement('div');
   col.className = 'col-12 col-md-6 col-lg-4';
@@ -42,7 +37,6 @@ function createLojaCard(loja) {
   const body = document.createElement('div');
   body.className = 'card-body';
 
-  // tenta usar imagem_logo (padrão do backend) ou fallback
   const img = document.createElement('img');
   img.src =
     loja.imagem_logo ||
@@ -118,8 +112,6 @@ function createProdutoCard(produto) {
   return col;
 }
 
-/* ---------- Carregamento da busca ---------- */
-
 async function carregarResultadosBusca() {
   const term = getSearchTerm();
 
@@ -142,7 +134,6 @@ async function carregarResultadosBusca() {
   try {
     const encoded = encodeURIComponent(term);
 
-    // Chama lojas e produtos em paralelo
     const [lojas, produtos] = await Promise.all([
       fetchJson(`/lojas?search=${encoded}`),
       fetchJson(`/produtos?search=${encoded}`),
@@ -160,7 +151,6 @@ async function carregarResultadosBusca() {
 
     if (resultsEl) resultsEl.classList.remove('d-none');
 
-    // Lojas
     if (hasLojas) {
       const secLojas = document.getElementById('results-lojas');
       const listLojas = document.getElementById('results-lojas-list');
@@ -171,7 +161,6 @@ async function carregarResultadosBusca() {
       }
     }
 
-    // Produtos
     if (hasProdutos) {
       const secProdutos = document.getElementById('results-produtos');
       const listProdutos = document.getElementById('results-produtos-list');

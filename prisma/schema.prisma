@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,10 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/* ============================================================
-   ENUMS
-   ============================================================ */
-
 enum UserType {
   CLIENTE
   VENDEDOR
@@ -20,9 +14,9 @@ enum UserType {
 }
 
 enum LojaStatus {
-  PENDENTE   @map("pendente")
-  APROVADA   @map("aprovada")
-  INATIVA    @map("inativa")
+  PENDENTE @map("pendente")
+  APROVADA @map("aprovada")
+  INATIVA  @map("inativa")
 }
 
 enum StatusPedido {
@@ -39,150 +33,180 @@ enum FormaPagamento {
   DINHEIRO
 }
 
-/* ============================================================
-   MODEL: USUARIOS
-   ============================================================ */
+enum StatusPagamento {
+  PENDENTE
+  PAGO
+  RECUSADO
+  ESTORNADO
+}
 
 model Usuario {
-  id          Int       @id @default(autoincrement())
-  nome        String    @db.VarChar(100)
-  email       String    @unique @db.VarChar(120)
-  senha       String    @db.VarChar(255)
-  telefone    String?   @db.VarChar(20)
-  tipo        UserType  @default(CLIENTE)
+  id       Int      @id @default(autoincrement())
+  nome     String   @db.VarChar(100)
+  email    String   @unique @db.VarChar(120)
+  senha    String   @db.VarChar(255)
+  telefone String?  @db.VarChar(20)
+  tipo     UserType @default(CLIENTE)
 
-  status      Boolean   @default(true)
+  status Boolean @default(true)
 
-  dataCriacao DateTime  @map("data_criacao") @default(now())
+  dataCriacao DateTime @default(now()) @map("data_criacao")
 
-  // Relação 1:1 — um vendedor só pode ter 1 loja
-  loja        Loja?
+  loja Loja?
 
-  // Relação 1:N — um cliente pode ter vários pedidos
-  pedidos     Pedido[]  @relation("UsuarioPedidos")
+  pedidos Pedido[] @relation("UsuarioPedidos")
+
+  enderecos Endereco[]
 
   @@map("usuarios")
 }
 
-/* ============================================================
-   MODEL: LOJAS
-   ============================================================ */
+model Endereco {
+  id Int @id @default(autoincrement())
+
+  usuarioId Int     @map("id_usuario")
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  apelido      String  @db.VarChar(60)
+  destinatario String  @db.VarChar(120)
+  telefone     String? @db.VarChar(20)
+
+  cep         String? @db.VarChar(10)
+  logradouro  String  @db.VarChar(160)
+  numero      String? @db.VarChar(20)
+  bairro      String? @db.VarChar(80)
+  cidade      String? @db.VarChar(80)
+  uf          String? @db.VarChar(2)
+  complemento String? @db.VarChar(160)
+
+  principal Boolean @default(false)
+
+  dataCriacao  DateTime @default(now()) @map("data_criacao")
+  dataAtualiza DateTime @updatedAt @map("data_atualiza")
+
+  @@index([usuarioId])
+  @@map("enderecos")
+}
 
 model Loja {
-  id                Int         @id @default(autoincrement())
-  nome              String      @db.VarChar(120)
-  descricao         String?
+  id        Int     @id @default(autoincrement())
+  nome      String  @db.VarChar(120)
+  descricao String?
 
-  usuarioId         Int         @unique @map("id_vendedor")
+  usuarioId Int @unique @map("id_vendedor")
 
-  endereco          String?     @db.VarChar(255)
-  telefone          String?     @db.VarChar(20)
+  endereco String? @db.VarChar(255)
+  telefone String? @db.VarChar(20)
 
-  imagemLogo        String?     @map("imagem_logo") @db.VarChar(255)
+  imagemLogo String? @map("imagem_logo") @db.VarChar(255)
 
-  status            LojaStatus  @default(PENDENTE)
+  status LojaStatus @default(PENDENTE)
 
-  horarioAbertura   DateTime?   @map("horario_abertura") @db.Time
-  horarioFechamento DateTime?   @map("horario_fechamento") @db.Time
+  horarioAbertura   DateTime? @map("horario_abertura") @db.Time
+  horarioFechamento DateTime? @map("horario_fechamento") @db.Time
 
-  dataCriacao       DateTime    @map("data_criacao") @default(now())
+  dataCriacao DateTime @default(now()) @map("data_criacao")
 
-  // Relacionamento com usuário (vendedor)
   dono Usuario @relation(fields: [usuarioId], references: [id])
 
-  // Relacionamento com produtos
   produtos Produto[]
+
+  pedidos Pedido[]
 
   @@map("lojas")
 }
 
-/* ============================================================
-   MODEL: CATEGORIAS  (NOVO)
-   ============================================================ */
-
 model Categoria {
-  id       Int       @id @default(autoincrement())
-  nome     String    @db.VarChar(120)
+  id   Int    @id @default(autoincrement())
+  nome String @db.VarChar(120)
 
   produtos Produto[]
 
   @@map("categorias")
 }
 
-/* ============================================================
-   MODEL: PRODUTOS
-   ============================================================ */
-
 model Produto {
-  id        Int      @id @default(autoincrement())
-  nome      String   @db.VarChar(100)
+  id        Int     @id @default(autoincrement())
+  nome      String  @db.VarChar(100)
   descricao String?
-  preco     Decimal  @db.Decimal(10, 2)
+  preco     Decimal @db.Decimal(10, 2)
 
-  // imagem principal exibida para o cliente
-  imagemUrl String?  @map("imagem_principal") @db.VarChar(255)
+  imagemUrl String? @map("imagem_principal") @db.VarChar(255)
 
-  // quantidade disponível em estoque
-  estoque   Int      @default(0)
+  estoque Int @default(0)
 
-  // se o produto está ativo/visível para os clientes
-  ativo     Boolean  @default(true)
+  ativo Boolean @default(true)
 
-  // data de cadastro do produto
-  dataCriacao DateTime @map("data_cadastro") @default(now())
+  dataCriacao DateTime @default(now()) @map("data_cadastro")
 
-  // 🔹 NOVO: categoria do produto (FK opcional)
-  idCategoria Int?        @map("id_categoria")
-  categoria   Categoria?  @relation(fields: [idCategoria], references: [id])
+  idCategoria Int?       @map("id_categoria")
+  categoria   Categoria? @relation(fields: [idCategoria], references: [id])
 
-  // loja dona do produto
-  lojaId    Int
-  loja      Loja     @relation(fields: [lojaId], references: [id])
+  lojaId Int
+  loja   Loja @relation(fields: [lojaId], references: [id])
 
   itensPedido ItemPedido[]
 
+  @@index([lojaId])
   @@map("produtos")
 }
 
-/* ============================================================
-   MODEL: PEDIDOS
-   ============================================================ */
-
 model Pedido {
-  id              Int            @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  dataCriacao     DateTime       @map("data_criacao") @default(now())
+  dataCriacao DateTime @default(now()) @map("data_criacao")
 
-  status          StatusPedido   @default(PENDENTE)
-  formaPagamento  FormaPagamento
+  status         StatusPedido   @default(PENDENTE)
+  formaPagamento FormaPagamento
 
-  enderecoEntrega String         @map("endereco_entrega")
+  enderecoEntrega String @map("endereco_entrega")
 
-  valorTotal      Decimal        @db.Decimal(10, 2)
+  valorTotal Decimal @db.Decimal(10, 2)
 
-  clienteId       Int
-  cliente         Usuario        @relation("UsuarioPedidos", fields: [clienteId], references: [id])
+  lojaId Int @map("id_loja")
+  loja   Loja @relation(fields: [lojaId], references: [id])
 
-  itens           ItemPedido[]
+  clienteId Int
+  cliente   Usuario @relation("UsuarioPedidos", fields: [clienteId], references: [id])
 
+  itens     ItemPedido[]
+  pagamento Pagamento?
+
+  @@index([clienteId])
+  @@index([lojaId])
   @@map("pedidos")
 }
 
-/* ============================================================
-   MODEL: ITENS DO PEDIDO
-   ============================================================ */
-
 model ItemPedido {
-  id            Int       @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   quantidade    Int
-  precoUnitario Decimal   @db.Decimal(10, 2)
-  subtotal      Decimal   @db.Decimal(10, 2)
+  precoUnitario Decimal @db.Decimal(10, 2)
+  subtotal      Decimal @db.Decimal(10, 2)
 
-  pedidoId      Int
-  pedido        Pedido    @relation(fields: [pedidoId], references: [id])
+  pedidoId Int
+  pedido   Pedido @relation(fields: [pedidoId], references: [id])
 
-  produtoId     Int
-  produto       Produto   @relation(fields: [produtoId], references: [id])
+  produtoId Int
+  produto   Produto @relation(fields: [produtoId], references: [id])
 
+  @@index([pedidoId])
+  @@index([produtoId])
   @@map("itens_pedido")
+}
+
+model Pagamento {
+  id Int @id @default(autoincrement())
+
+  pedidoId Int @unique @map("id_pedido")
+  pedido   Pedido @relation(fields: [pedidoId], references: [id])
+
+  metodo FormaPagamento
+  status StatusPagamento @default(PENDENTE)
+
+  valor Decimal @db.Decimal(10, 2)
+
+  dataCriacao DateTime @default(now()) @map("data_criacao")
+  dataPago    DateTime? @map("data_pago")
+
+  @@map("pagamentos")
 }

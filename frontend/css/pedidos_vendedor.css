@@ -1,5 +1,3 @@
-/* frontend/css/pedidos_vendedor.css */
-
 .pedidos-page {
     background: #f5f5f5;
   }
@@ -7,9 +5,7 @@
   .pedidos-wrapper {
     max-width: 1180px;
   }
-  
-  /* Filtros */
-  
+    
   .pedidos-filtro-card {
     border-radius: 18px;
     border: 0;
@@ -20,9 +16,7 @@
     font-size: 0.8rem;
     color: #6b7280;
   }
-  
-  /* Lista de pedidos */
-  
+    
   .pedidos-lista-card {
     border-radius: 18px;
     border: 0;
@@ -62,7 +56,6 @@
     padding: 0.25rem 0.6rem;
   }
   
-  /* cores sugeridas para status */
   .pedido-status-badge.pendente {
     background-color: #fef9c3;
     color: #854d0e;
@@ -87,15 +80,11 @@
     background-color: #fee2e2;
     color: #b91c1c;
   }
-  
-  /* Botão de ação */
-  
+    
   .btn-ver-pedido {
     font-size: 0.8rem;
   }
-  
-  /* Modal */
-  
+    
   .modal-pedido .modal-content {
     border-radius: 18px;
   }
@@ -118,9 +107,7 @@
     margin-top: 0.35rem;
     padding-top: 0.35rem;
   }
-  
-  /* responsivo */
-  
+    
   @media (max-width: 767.98px) {
     .pedidos-wrapper {
       padding-inline: 0;

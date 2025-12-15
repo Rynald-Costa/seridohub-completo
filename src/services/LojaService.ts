@@ -1,13 +1,7 @@
-// src/services/LojaService.ts
 import prisma from '../prisma';
 import { Prisma } from '@prisma/client';
 
 class LojaService {
-  /* ============================================================
-     LISTAGENS PÚBLICAS / GERAIS
-     ============================================================ */
-
-  // Lista todas as lojas, opcionalmente filtrando por search
   async listarLojas(search?: string) {
     const where: Prisma.LojaWhereInput = {};
 
@@ -45,7 +39,6 @@ class LojaService {
     });
   }
 
-  // Lista (em teoria 0 ou 1) lojas de um vendedor
   async listarLojasDoVendedor(usuarioId: number) {
     return prisma.loja.findMany({
       where: { usuarioId },
@@ -91,10 +84,6 @@ class LojaService {
     });
   }
 
-  /* ============================================================
-     CRIAÇÃO DE LOJA – 1 LOJA POR VENDEDOR
-     ============================================================ */
-
   async criarLoja(data: {
     usuarioId: number;
     nome: string;
@@ -102,8 +91,8 @@ class LojaService {
     endereco?: string | null;
     telefone?: string | null;
     imagemLogo?: string | null;
-    horarioAbertura?: string | null;   // "HH:mm"
-    horarioFechamento?: string | null; // "HH:mm"
+    horarioAbertura?: string | null;
+    horarioFechamento?: string | null;
   }) {
     const usuario = await prisma.usuario.findUnique({
       where: { id: data.usuarioId },
@@ -117,7 +106,6 @@ class LojaService {
       throw new Error('Apenas usuários do tipo VENDEDOR podem cadastrar loja');
     }
 
-    // Regra: 1 vendedor -> 1 loja
     const existing = await prisma.loja.findFirst({
       where: { usuarioId: data.usuarioId },
     });
@@ -162,12 +150,6 @@ class LojaService {
     return loja;
   }
 
-  /* ============================================================
-     BUSCA POR USUÁRIO (LOJA ÚNICA DO VENDEDOR)
-     ============================================================ */
-
-  // Busca a loja do vendedor pelo ID do usuário (1:1).
-  // Usa findFirst para evitar qualquer problema com índices únicos.
   async buscarPorUsuario(usuarioId: number) {
     const loja = await prisma.loja.findFirst({
       where: { usuarioId },
@@ -183,12 +165,8 @@ class LojaService {
       },
     });
 
-    return loja; // pode ser null se não existir
+    return loja;
   }
-
-  /* ============================================================
-     ATUALIZAÇÃO DA LOJA (SOMENTE DONO)
-     ============================================================ */
 
   async atualizarLoja(params: {
     id: number;
@@ -198,8 +176,8 @@ class LojaService {
     endereco?: string | null;
     telefone?: string | null;
     imagemLogo?: string | null;
-    horarioAbertura?: string | null;   // "HH:mm" ou ""
-    horarioFechamento?: string | null; // "HH:mm" ou ""
+    horarioAbertura?: string | null;
+    horarioFechamento?: string | null;
     status?: 'PENDENTE' | 'APROVADA' | 'INATIVA';
   }) {
     const {
@@ -270,11 +248,6 @@ class LojaService {
   }
 }
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
-
-// Converte string "HH:mm" para Date (TIME no banco).
 function parseHoraString(hora?: string | null): Date | null {
   if (!hora) return null;
 

@@ -1,15 +1,12 @@
-// frontend/js/lojas.js
-
 const API_URL = 'http://localhost:3000/api';
 
 document.addEventListener('DOMContentLoaded', () => {
   carregarLojas();
 });
 
-let lojas = []; // vai guardar o que vier da API
+let lojas = [];
 
 function calcularStatusHorario(loja) {
-  // Se não tiver horários configurados, só marca como "indisponível"
   if (!loja.horario_abertura || !loja.horario_fechamento) {
     return loja.status === 'aprovado' ? 'indisponivel' : 'indisponivel';
   }
@@ -38,7 +35,7 @@ function calcularStatusHorario(loja) {
 
 function formatarHorario(horaStr) {
   if (!horaStr) return '';
-  return horaStr.slice(0, 5); // "HH:MM"
+  return horaStr.slice(0, 5); 
 }
 
 function formatarDataCriacao(dataStr) {
@@ -64,6 +61,36 @@ function criarBadgeStatus(loja) {
   return '<span class="badge bg-secondary rounded-pill">Indisponível</span>';
 }
 
+function getLogoUrl(loja) {
+  const placeholder = 'https://via.placeholder.com/120x120.png?text=Loja';
+
+  const raw =
+    loja?.imagem_logo ||
+    loja?.imagemLogo ||
+    loja?.logo ||
+    loja?.logoUrl ||
+    loja?.imagem_url ||
+    null;
+
+  if (!raw || typeof raw !== 'string') return placeholder;
+
+  const url = raw.trim();
+  if (!url) return placeholder;
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  if (url.startsWith('//')) {
+    return window.location.protocol + url;
+  }
+
+  const normalized = url.startsWith('/') ? url : `/${url}`;
+
+  return `${window.location.origin}${normalized}`;
+}
+/* ----------------------------------------------------- */
+
 function criarCardLoja(loja) {
   const badge = criarBadgeStatus(loja);
 
@@ -72,8 +99,9 @@ function criarCardLoja(loja) {
   )}`;
   const desde = formatarDataCriacao(loja.data_criacao);
 
-  // Agora o link aponta para a página de produtos, passando o id da loja
   const linkLoja = `produtos.html?lojaId=${loja.id}`;
+
+  const logoSrc = getLogoUrl(loja);
 
   return `
     <div class="col-12 col-md-6 col-lg-4">
@@ -81,7 +109,11 @@ function criarCardLoja(loja) {
         <div class="card-body d-flex flex-column">
           <div class="d-flex align-items-center mb-2">
             <div class="store-logo-wrapper">
-              <img src="${loja.imagem_logo || 'https://via.placeholder.com/120x120.png?text=Loja'}" alt="Logo da loja ${loja.nome}">
+              <img
+                src="${logoSrc}"
+                alt="Logo da loja ${loja.nome}"
+                onerror="this.onerror=null;this.src='https://via.placeholder.com/120x120.png?text=Loja';"
+              >
             </div>
             <div class="flex-grow-1">
               <div class="d-flex align-items-center justify-content-between">
@@ -201,17 +233,18 @@ async function carregarLojas() {
       return;
     }
 
-    // Mapeia o que vem da API para o formato esperado pelo layout
     lojas = data.map((loja) => ({
       ...loja,
-      // Como o banco ainda não tem esses campos, usamos defaults pra manter o layout
-      status: 'aprovado',
-      horario_abertura: '08:00',
-      horario_fechamento: '18:00',
-      imagem_logo: null,
-      endereco: '',
-      telefone: '',
-      data_criacao: new Date().toISOString(),
+
+      status: loja.status ?? 'aprovado',
+      horario_abertura: loja.horario_abertura ?? '08:00',
+      horario_fechamento: loja.horario_fechamento ?? '18:00',
+
+      imagem_logo: loja.imagem_logo ?? loja.imagemLogo ?? loja.logoUrl ?? loja.logo ?? null,
+
+      endereco: loja.endereco ?? '',
+      telefone: loja.telefone ?? '',
+      data_criacao: loja.data_criacao ?? new Date().toISOString(),
     }));
 
     atualizarLista();

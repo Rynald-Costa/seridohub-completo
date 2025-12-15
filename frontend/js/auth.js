@@ -1,26 +1,33 @@
-// frontend/js/auth.js
-
 const API_URL = 'http://localhost:3000/api';
 
-/* ------------------- AUTH STORAGE ------------------- */
-
-// Salva token e usuário no localStorage
 function saveAuth(data) {
   if (!data) return;
 
-  if (data.token) {
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('authToken', data.token); // extra, mais descritivo
+  const token =
+    data.token ||
+    data.accessToken ||
+    data.jwt ||
+    data?.data?.token ||
+    data?.data?.accessToken;
+
+  const user =
+    data.user ||
+    data.usuario ||
+    data?.data?.user ||
+    data?.data?.usuario;
+
+  if (token) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('authToken', token);
   }
 
-  if (data.user) {
-    const userStr = JSON.stringify(data.user);
+  if (user) {
+    const userStr = JSON.stringify(user);
     localStorage.setItem('user', userStr);
-    localStorage.setItem('currentUser', userStr); // extra, mais descritivo
+    localStorage.setItem('currentUser', userStr); 
   }
 }
 
-// Helpers para login/logout
 function getCurrentUser() {
   const raw = localStorage.getItem('user') || localStorage.getItem('currentUser');
   if (!raw) return null;
@@ -43,8 +50,6 @@ function logout() {
   window.location.href = 'login.html';
 }
 
-/* ------------------- LOGIN (login.html) ------------------- */
-
 function setupLoginPage() {
   const stepEmail = document.getElementById('step-email');
   const stepPassword = document.getElementById('step-password');
@@ -61,7 +66,6 @@ function setupLoginPage() {
   const displayEmail = document.getElementById('display-email');
   const changeEmailLink = document.getElementById('change-email');
 
-  // Se a página não tiver essa estrutura, não faz nada
   if (
     !stepEmail ||
     !stepPassword ||
@@ -79,7 +83,10 @@ function setupLoginPage() {
 
   let currentEmail = '';
 
-  // Se vier email pela URL (?email=...), já preenche e pula pra senha
+  function isAdminEmail(email) {
+    return String(email || '').trim().toLowerCase() === 'admin';
+  }
+
   const params = new URLSearchParams(window.location.search);
   const emailFromUrl = params.get('email');
   if (emailFromUrl) {
@@ -91,7 +98,6 @@ function setupLoginPage() {
     passwordInput.focus();
   }
 
-  // ETAPA 1 — verifica se o e-mail existe no banco
   emailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     emailError.textContent = '';
@@ -100,6 +106,15 @@ function setupLoginPage() {
 
     if (!email) {
       emailError.textContent = 'Por favor, informe um e-mail.';
+      return;
+    }
+
+    if (isAdminEmail(email)) {
+      currentEmail = 'admin';
+      displayEmail.textContent = 'admin';
+      stepEmail.classList.add('d-none');
+      stepPassword.classList.remove('d-none');
+      passwordInput.focus();
       return;
     }
 
@@ -118,7 +133,6 @@ function setupLoginPage() {
         return;
       }
 
-      // Se não existe → manda pro cadastro com o e-mail preenchido
       if (!data.exists) {
         const irCadastro = confirm(
           'Não encontramos uma conta com esse e-mail. Deseja criar uma conta?'
@@ -133,14 +147,12 @@ function setupLoginPage() {
         return;
       }
 
-      // Se existe mas estiver desativado / bloqueado (caso você use isso depois)
       if (data.status === false || data.status === 'inativo' || data.status === 'bloqueado') {
         emailError.textContent =
           'Esta conta está desativada. Entre em contato com o suporte.';
         return;
       }
 
-      // E-mail existe e está ativo → segue para etapa da senha
       currentEmail = email;
       displayEmail.textContent = email;
 
@@ -154,7 +166,6 @@ function setupLoginPage() {
     }
   });
 
-  // ETAPA 2 — faz login na API
   passwordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     passwordError.textContent = '';
@@ -171,8 +182,11 @@ function setupLoginPage() {
       return;
     }
 
+    const isAdmin = isAdminEmail(currentEmail);
+    const endpoint = isAdmin ? `${API_URL}/auth/admin-login` : `${API_URL}/auth/login`;
+
     try {
-      const resp = await fetch(`${API_URL}/auth/login`, {
+      const resp = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: currentEmail, senha }),
@@ -186,16 +200,19 @@ function setupLoginPage() {
         return;
       }
 
-      // sucesso → salva no localStorage e vai pra home
       saveAuth(data);
-      window.location.href = 'index.html';
+
+      if (isAdmin) {
+        window.location.href = 'admin-dashboard.html';
+      } else {
+        window.location.href = 'index.html';
+      }
     } catch (err) {
       console.error(err);
       passwordError.textContent = 'Erro de conexão com o servidor.';
     }
   });
 
-  // voltar para alterar e-mail
   changeEmailLink.addEventListener('click', (e) => {
     e.preventDefault();
 
@@ -208,8 +225,6 @@ function setupLoginPage() {
     emailInput.focus();
   });
 }
-
-/* ------------------- CADASTRO (cadastro.html) ------------------- */
 
 function setupCadastroPage() {
   const params = new URLSearchParams(window.location.search);
@@ -235,7 +250,6 @@ function setupCadastroPage() {
     const senha = document.getElementById('senha')?.value;
     const confirmarSenha = document.getElementById('confirmarSenha')?.value;
 
-    // validação básica
     if (!nome || !email || !tipo || !senha || !confirmarSenha) {
       if (errorBox) {
         errorBox.textContent = 'Preencha todos os campos obrigatórios.';
@@ -287,7 +301,6 @@ function setupCadastroPage() {
         return;
       }
 
-      // auto-login após cadastro (API devolve { token, user })
       saveAuth(data);
       alert('Conta criada com sucesso!');
       window.location.href = 'index.html';
@@ -302,8 +315,6 @@ function setupCadastroPage() {
   });
 }
 
-/* ------------------- INICIALIZAÇÃO ------------------- */
-
 document.addEventListener('DOMContentLoaded', () => {
   const page = window.location.pathname.split('/').pop()?.toLowerCase();
 
@@ -313,6 +324,3 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCadastroPage();
   }
 });
-
-// Se quiser usar esses helpers em outros arquivos,
-// eles já estão no escopo global (window.*) por estarem no topo.

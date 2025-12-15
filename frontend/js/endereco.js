@@ -1,247 +1,282 @@
-// frontend/js/endereco.js
+const API_BASES = ["/api/enderecos", "/enderecos"];
 
-const ADDRESS_KEY = 'addresses';
-const SELECTED_ADDRESS_KEY = 'selectedAddress';
+function getAuthToken() {
+  return localStorage.getItem("token") || localStorage.getItem("authToken") || "";
+}
 
-// Utilitários básicos de endereço
-function getAddresses() {
-  const raw = localStorage.getItem(ADDRESS_KEY);
-  if (!raw) return [];
+function authHeaders() {
+  const token = getAuthToken();
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+let addresses = [];
+let selectedAddressId = null;
+
+async function safeJson(res) {
   try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed;
+    return await res.json();
   } catch {
-    return [];
+    return null;
   }
 }
 
-function saveAddresses(addresses) {
-  localStorage.setItem(ADDRESS_KEY, JSON.stringify(addresses));
+async function buildHttpError(res) {
+  const body = await safeJson(res);
+  const msg = body?.message || body?.error || `Erro HTTP ${res.status}`;
+  return new Error(msg);
 }
 
-function saveSelectedAddress(address) {
-  localStorage.setItem(SELECTED_ADDRESS_KEY, JSON.stringify(address));
-}
+async function fetchWithAnyBase(path, options = {}) {
+  const token = getAuthToken();
+  if (!token) throw new Error("Sessão expirada. Faça login novamente.");
 
-function renderAddressList() {
-  const list = document.getElementById('address-list');
-  const empty = document.getElementById('address-empty');
+  let lastErr = null;
 
-  if (!list || !empty) return;
-
-  const addresses = getAddresses();
-
-  if (!addresses.length) {
-    list.innerHTML = '';
-    empty.classList.remove('d-none');
-    return;
-  }
-
-  empty.classList.add('d-none');
-
-  const selectedRaw = localStorage.getItem(SELECTED_ADDRESS_KEY);
-  let selectedId = null;
-  if (selectedRaw) {
+  for (const base of API_BASES) {
     try {
-      const sel = JSON.parse(selectedRaw);
-      selectedId = sel.id ?? null;
-    } catch {
-      selectedId = null;
+      const res = await fetch(`${base}${path}`, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          ...authHeaders(),
+        },
+      });
+
+      if (!res.ok) throw await buildHttpError(res);
+      return res;
+    } catch (err) {
+      lastErr = err;
+      continue;
     }
   }
 
+  throw lastErr || new Error("Falha ao acessar a API de endereços.");
+}
+
+async function fetchAddresses() {
+  const res = await fetchWithAnyBase("", { method: "GET" });
+  return res.json();
+}
+
+async function createAddress(payload) {
+  const res = await fetchWithAnyBase("", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return res.json();
+}
+
+async function deleteAddress(id) {
+  await fetchWithAnyBase(`/${id}`, {
+    method: "DELETE",
+  });
+}
+
+function setFormVisible(visible) {
+  const formWrapper = document.getElementById("address-form-wrapper");
+  const formHint = document.getElementById("address-form-hidden-hint");
+  const closeBtn = document.getElementById("address-form-close-btn");
+
+  if (!formWrapper || !formHint || !closeBtn) return;
+
+  if (visible) {
+    formWrapper.classList.remove("d-none");
+    formHint.classList.add("d-none");
+    closeBtn.classList.remove("d-none");
+  } else {
+    formWrapper.classList.add("d-none");
+    formHint.classList.remove("d-none");
+    closeBtn.classList.add("d-none");
+  }
+}
+
+function renderAddresses() {
+  const list = document.getElementById("address-list");
+  const empty = document.getElementById("address-empty");
+  const continueBtn = document.getElementById("address-continue-btn");
+  const hint = document.getElementById("address-select-hint");
+  const addBtn = document.getElementById("address-add-toggle-btn");
+
+  if (!list || !empty || !continueBtn || !hint || !addBtn) return;
+
+  if (!addresses.length) {
+    list.innerHTML = "";
+    empty.classList.remove("d-none");
+
+    continueBtn.disabled = true;
+    hint.classList.add("d-none");
+
+    addBtn.classList.add("d-none");
+    setFormVisible(true); 
+    return;
+  }
+
+  empty.classList.add("d-none");
+  addBtn.classList.remove("d-none");
+
   list.innerHTML = addresses
     .map((addr) => {
-      const isSelected = addr.id === selectedId;
-
-      const linha1 = [
-        addr.logradouro || '',
-        addr.numero || '',
-        addr.bairro || '',
-      ]
-        .filter(Boolean)
-        .join(', ');
-
-      const linha2 = [
-        addr.cidade || '',
-        addr.estado || '',
-        addr.cep || '',
-      ]
-        .filter(Boolean)
-        .join(' - ');
+      const linha1 = [addr.logradouro, addr.numero, addr.bairro].filter(Boolean).join(", ");
+      const linha2 = [addr.cidade, addr.uf, addr.cep].filter(Boolean).join(" - ");
 
       return `
-        <label class="border rounded-3 p-3 d-flex gap-3 align-items-start address-item">
+        <label class="border rounded-3 p-3 d-flex gap-3 align-items-start">
           <input
             type="radio"
-            name="enderecoSelecionado"
+            name="address"
             class="form-check-input mt-1"
             value="${addr.id}"
-            ${isSelected ? 'checked' : ''}
+            ${addr.id === selectedAddressId ? "checked" : ""}
           />
           <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <div>
-                <strong>${addr.apelido || 'Endereço'}</strong>
-                ${
-                  addr.nome
-                    ? `<span class="small text-muted ms-2">${addr.nome}</span>`
-                    : ''
-                }
-              </div>
+              <strong>${addr.apelido || "Endereço"}</strong>
               <button
                 type="button"
                 class="btn btn-link btn-sm text-danger p-0 address-delete-btn"
                 data-id="${addr.id}"
+                title="Remover"
               >
                 <i class="bi bi-trash"></i>
               </button>
             </div>
-            <div class="small">
-              ${linha1 || ''}
-            </div>
-            <div class="small text-muted">
-              ${linha2 || ''}
-              ${
-                addr.complemento
-                  ? `<br /><span>${addr.complemento}</span>`
-                  : ''
-              }
-            </div>
+            <div class="small">${linha1}</div>
+            <div class="small text-muted">${linha2}</div>
           </div>
         </label>
       `;
     })
-    .join('');
+    .join("");
 
-  // Eventos de delete
-  list.querySelectorAll('.address-delete-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = Number(btn.getAttribute('data-id'));
+  continueBtn.disabled = selectedAddressId == null;
+  hint.classList.toggle("d-none", selectedAddressId != null);
+
+  bindListEvents();
+}
+
+function bindListEvents() {
+  document.querySelectorAll("input[name='address']").forEach((radio) => {
+    radio.addEventListener("change", () => {
+      selectedAddressId = Number(radio.value);
+      renderAddresses();
+    });
+  });
+
+  document.querySelectorAll(".address-delete-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = Number(btn.dataset.id);
       if (!id) return;
-      if (!confirm('Deseja remover este endereço?')) return;
 
-      const current = getAddresses().filter((a) => a.id !== id);
-      saveAddresses(current);
+      if (!confirm("Remover este endereço?")) return;
 
-      // se o selecionado foi removido, limpa
-      const selRaw = localStorage.getItem(SELECTED_ADDRESS_KEY);
-      if (selRaw) {
-        try {
-          const sel = JSON.parse(selRaw);
-          if (sel.id === id) {
-            localStorage.removeItem(SELECTED_ADDRESS_KEY);
-          }
-        } catch {
-          // ignore
-        }
+      try {
+        await deleteAddress(id);
+        addresses = addresses.filter((a) => a.id !== id);
+        if (selectedAddressId === id) selectedAddressId = null;
+        renderAddresses();
+      } catch (e) {
+        alert(e.message || "Erro ao remover endereço");
       }
-
-      renderAddressList();
     });
   });
 }
 
-function handleAddressForm() {
-  const form = document.getElementById('address-form');
-  const errorBox = document.getElementById('address-form-error');
+function bindForm() {
+  const addBtn = document.getElementById("address-add-toggle-btn");
+  const closeBtn = document.getElementById("address-form-close-btn");
+  const form = document.getElementById("address-form");
+  const errorBox = document.getElementById("address-form-error");
+
+  addBtn?.addEventListener("click", () => setFormVisible(true));
+  closeBtn?.addEventListener("click", () => setFormVisible(false));
+
   if (!form) return;
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (errorBox) errorBox.textContent = '';
+    if (errorBox) errorBox.textContent = "";
 
-    const apelido = document.getElementById('endereco-apelido').value.trim();
-    const nome = document.getElementById('endereco-nome').value.trim();
-    const telefone = document
-      .getElementById('endereco-telefone')
-      .value.trim();
-    const cep = document.getElementById('endereco-cep').value.trim();
-    const logradouro = document
-      .getElementById('endereco-logradouro')
-      .value.trim();
-    const numero = document.getElementById('endereco-numero').value.trim();
-    const bairro = document.getElementById('endereco-bairro').value.trim();
-    const cidade = document.getElementById('endereco-cidade').value.trim();
-    const estado = document.getElementById('endereco-estado').value.trim();
-    const complemento = document
-      .getElementById('endereco-complemento')
-      .value.trim();
-
-    if (!apelido || !nome || !logradouro) {
-      if (errorBox) {
-        errorBox.textContent =
-          'Preencha pelo menos apelido, nome e rua/avenida.';
-      }
-      return;
-    }
-
-    const addresses = getAddresses();
-    const newId =
-      addresses.length > 0
-        ? Math.max(...addresses.map((a) => a.id || 0)) + 1
-        : 1;
-
-    const newAddress = {
-      id: newId,
-      apelido,
-      nome,
-      telefone,
-      cep,
-      logradouro,
-      numero,
-      bairro,
-      cidade,
-      estado,
-      complemento,
+    const payload = {
+      apelido: document.getElementById("endereco-apelido").value.trim(),
+      destinatario: document.getElementById("endereco-nome").value.trim(),
+      telefone: document.getElementById("endereco-telefone").value.trim(),
+      cep: document.getElementById("endereco-cep").value.trim(),
+      logradouro: document.getElementById("endereco-logradouro").value.trim(),
+      numero: document.getElementById("endereco-numero").value.trim(),
+      bairro: document.getElementById("endereco-bairro").value.trim(),
+      cidade: document.getElementById("endereco-cidade").value.trim(),
+      uf: document.getElementById("endereco-estado").value.trim(),
+      complemento: document.getElementById("endereco-complemento").value.trim(),
     };
 
-    addresses.push(newAddress);
-    saveAddresses(addresses);
-    saveSelectedAddress(newAddress);
+    if (!payload.apelido || !payload.destinatario || !payload.logradouro) {
+      if (errorBox) errorBox.textContent = "Preencha apelido, nome do destinatário e rua/avenida.";
+      return;
+    }
 
-    form.reset();
-    renderAddressList();
+    try {
+      const novo = await createAddress(payload);
+
+      addresses.unshift(novo);
+      selectedAddressId = novo.id; 
+
+      form.reset();
+
+      if (addresses.length > 0) setFormVisible(false);
+
+      renderAddresses();
+    } catch (err) {
+      if (errorBox) errorBox.textContent = err.message || "Erro ao salvar endereço";
+    }
   });
 }
 
-function handleContinueButton() {
-  const btn = document.getElementById('address-continue-btn');
+function bindContinue() {
+  const btn = document.getElementById("address-continue-btn");
   if (!btn) return;
 
-  btn.addEventListener('click', () => {
-    const addresses = getAddresses();
-    if (!addresses.length) {
-      alert('Cadastre e selecione um endereço antes de continuar.');
+  btn.addEventListener("click", () => {
+    if (!selectedAddressId) return;
+
+    const selected = addresses.find((a) => a.id === selectedAddressId);
+    if (!selected) {
+      alert("Endereço selecionado não encontrado. Selecione novamente.");
       return;
     }
 
-    const selectedRadio = document.querySelector(
-      'input[name="enderecoSelecionado"]:checked'
-    );
+    localStorage.setItem("selectedAddress", JSON.stringify(selected));
 
-    if (!selectedRadio) {
-      alert('Selecione um endereço antes de continuar.');
-      return;
-    }
+    localStorage.setItem("checkoutAddressId", String(selectedAddressId));
 
-    const selectedId = Number(selectedRadio.value);
-    const address = addresses.find((a) => a.id === selectedId);
-    if (!address) {
-      alert('Endereço selecionado não encontrado.');
-      return;
-    }
-
-    saveSelectedAddress(address);
-
-    // Próxima etapa do fluxo: pagamento
-    window.location.href = 'pagamento.html';
+    window.location.href = "pagamento.html";
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  renderAddressList();
-  handleAddressForm();
-  handleContinueButton();
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = getAuthToken();
+  if (!token) {
+    alert("Você precisa estar logado para continuar.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    addresses = await fetchAddresses();
+
+    const principal = addresses.find((a) => a.principal);
+    if (principal) selectedAddressId = principal.id;
+
+    renderAddresses();
+    bindForm();
+    bindContinue();
+
+    if (addresses.length) setFormVisible(false);
+  } catch (e) {
+    console.error(e);
+    alert(e?.message || "Erro ao carregar endereços.");
+  }
 });

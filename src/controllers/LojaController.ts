@@ -1,9 +1,7 @@
-// src/controllers/LojaController.ts
 import { Request, Response } from 'express';
 import LojaService from '../services/LojaService';
 
 class LojaController {
-  // GET /api/lojas?search=Pizza
   async list(req: Request, res: Response) {
     try {
       const searchParam = req.query.search;
@@ -20,7 +18,6 @@ class LojaController {
     }
   }
 
-  // GET /api/lojas/:id
   async getById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
@@ -39,7 +36,6 @@ class LojaController {
     }
   }
 
-  // GET /api/lojas/:id/produtos
   async getProdutos(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
@@ -57,7 +53,6 @@ class LojaController {
     }
   }
 
-  // GET /api/lojas/minha → loja única do vendedor logado (1:1)
   async getMinhaLoja(req: Request, res: Response) {
     try {
       const userId = (req as any).user?.id as number | undefined;
@@ -83,7 +78,6 @@ class LojaController {
     }
   }
 
-  // GET /api/lojas/minhas → compatível com a página minha_loja.js
   async getMinhasLojas(req: Request, res: Response) {
     try {
       const userId = (req as any).user?.id as number | undefined;
@@ -109,7 +103,6 @@ class LojaController {
     }
   }
 
-  // POST /api/lojas → cadastro de loja pelo vendedor logado
   async create(req: Request, res: Response) {
     try {
       const userId = (req as any).user?.id as number | undefined;
@@ -123,9 +116,9 @@ class LojaController {
         descricao,
         endereco,
         telefone,
-        imagemLogo,          // URL da logo / imagem da loja
-        horarioAbertura,     // esperado "HH:mm"
-        horarioFechamento,   // esperado "HH:mm"
+        imagemLogo,
+        horarioAbertura,
+        horarioFechamento,
       } = req.body;
 
       if (!nome || typeof nome !== 'string') {
@@ -154,7 +147,6 @@ class LojaController {
     }
   }
 
-  // PUT /api/lojas/:id → atualizar dados da loja (somente dono)
   async update(req: Request, res: Response) {
     try {
       const userId = (req as any).user?.id as number | undefined;
@@ -175,7 +167,7 @@ class LojaController {
         imagemLogo,
         horarioAbertura,
         horarioFechamento,
-        status, // opcional: 'PENDENTE' | 'APROVADA' | 'INATIVA'
+        status,
       } = req.body;
 
       const lojaAtualizada = await LojaService.atualizarLoja({

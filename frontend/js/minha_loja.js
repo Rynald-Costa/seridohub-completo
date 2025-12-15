@@ -1,5 +1,3 @@
-// frontend/js/minha_loja.js
-
 const API_BASE_URL = window.API_BASE_URL || '/api';
 const LOJAS_ENDPOINT = `${API_BASE_URL}/lojas`;
 
@@ -27,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const errorBox = document.getElementById('loja-error');
   const successBox = document.getElementById('loja-success');
 
-  // Se não tiver usuário logado
   if (!user) {
     renderAlert(
       alertBox,
@@ -38,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Se não for vendedor
   if (user.tipo !== 'VENDEDOR') {
     renderAlert(
       alertBox,
@@ -49,17 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // ID da loja atual (se existir). null = ainda criando a primeira loja.
   let lojaEmEdicaoId = null;
 
-  // Carrega a loja do vendedor ao abrir a página
   carregarLojaDoVendedor();
-
-  // --- Eventos ---
 
   if (btnCancelarEdicao) {
     btnCancelarEdicao.addEventListener('click', () => {
-      // Volta os dados da loja que está no backend
       carregarLojaDoVendedor();
     });
   }
@@ -96,14 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let res;
 
         if (lojaEmEdicaoId !== null) {
-          // Atualizar loja existente
           res = await fetch(`${LOJAS_ENDPOINT}/${lojaEmEdicaoId}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(body),
           });
         } else {
-          // Criar nova loja
           res = await fetch(LOJAS_ENDPOINT, {
             method: 'POST',
             headers: getAuthHeaders(),
@@ -130,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
               : 'Loja cadastrada com sucesso!';
         }
 
-        // Recarrega estado a partir do backend (garante dados sincronizados)
         await carregarLojaDoVendedor(false);
       } catch (err) {
         console.error(err);
@@ -140,10 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  /* ============================================================
-     Funções principais
-     ============================================================ */
 
   async function carregarLojaDoVendedor(mostrarLoading = true) {
     try {
@@ -156,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (res.status === 404) {
-        // Nenhuma loja cadastrada ainda → modo "primeira loja"
         lojaEmEdicaoId = null;
         iniciarModoCriacaoPrimeiraLoja();
         renderAlert(
@@ -256,10 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/* ============================================================
-   AUXILIARES
-   ============================================================ */
-
 function getAuthHeaders() {
   const token =
     (typeof getToken === 'function' && getToken()) ||
@@ -299,11 +278,9 @@ async function safeJson(res) {
   }
 }
 
-// Converte o valor vindo do backend para o formato "HH:mm" do input[type="time"]
 function formatHoraParaInput(value) {
   if (!value) return '';
 
-  // Se já estiver no formato "HH:mm", retorna direto
   if (typeof value === 'string' && /^\d{2}:\d{2}/.test(value)) {
     return value.slice(0, 5);
   }

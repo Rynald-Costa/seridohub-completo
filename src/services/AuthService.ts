@@ -1,6 +1,5 @@
-// src/services/AuthService.ts
 import prisma from '../prisma';
-import { UserType, Usuario } from '@prisma/client';
+import { UserType } from '@prisma/client';
 import { comparePassword, generateToken, hashPassword } from '../utils/helpers';
 
 class AuthService {
@@ -15,17 +14,17 @@ class AuthService {
 
     return {
       exists: true,
-      status: user.status,  // true/false
-      tipo: user.tipo,      // CLIENTE / VENDEDOR / ADMIN
+      status: user.status,
+      tipo: user.tipo,
     };
   }
-  
+
   async register(data: {
     nome: string;
     email: string;
     senha: string;
     telefone?: string;
-    tipo?: UserType; // CLIENTE | VENDEDOR | ADMIN
+    tipo?: UserType;
   }) {
     const existing = await prisma.usuario.findUnique({
       where: { email: data.email },
@@ -43,9 +42,7 @@ class AuthService {
         email: data.email,
         senha: hashed,
         telefone: data.telefone ?? null,
-        // se não vier tipo, usa o default lógico do sistema
         tipo: data.tipo ?? UserType.CLIENTE,
-        // status e dataCriacao já têm default no schema
       },
     });
 
@@ -66,7 +63,6 @@ class AuthService {
       throw new Error('Credenciais inválidas');
     }
 
-    // Se o usuário estiver desativado, bloqueia o login
     if (!user.status) {
       throw new Error('Usuário desativado');
     }
@@ -83,6 +79,55 @@ class AuthService {
     });
 
     const { senha: _, ...safeUser } = user;
+    return { token, user: safeUser };
+  }
+
+  async adminLogin(email: string, senha: string) {
+    if (email !== 'admin' || senha !== 'admin') {
+      throw new Error('Credenciais inválidas');
+    }
+
+    let adminUser = await prisma.usuario.findUnique({
+      where: { email: 'admin' },
+    });
+
+    if (!adminUser) {
+      const hashed = await hashPassword('admin');
+
+      adminUser = await prisma.usuario.create({
+        data: {
+          nome: 'Administrador',
+          email: 'admin',
+          senha: hashed,
+          telefone: null,
+          tipo: UserType.ADMIN,
+          status: true,
+        },
+      });
+    } else {
+      if (adminUser.tipo !== UserType.ADMIN || adminUser.status !== true) {
+        adminUser = await prisma.usuario.update({
+          where: { email: 'admin' },
+          data: {
+            tipo: UserType.ADMIN,
+            status: true,
+          },
+        });
+      }
+
+      const ok = await comparePassword('admin', adminUser.senha);
+      if (!ok) {
+        throw new Error('Credenciais inválidas');
+      }
+    }
+
+    const token = generateToken({
+      id: adminUser.id,
+      email: adminUser.email,
+      tipo: adminUser.tipo,
+    });
+
+    const { senha: _, ...safeUser } = adminUser;
     return { token, user: safeUser };
   }
 

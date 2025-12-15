@@ -1,20 +1,19 @@
-// src/services/ProdutoService.ts
 import prisma from '../prisma';
 import { Prisma } from '@prisma/client';
 
 interface CriarProdutoDTO {
-  usuarioId: number;          // vendedor logado
+  usuarioId: number;
   nome: string;
   preco: number;
   descricao?: string | null;
   imagemUrl?: string | null;
-  estoque?: number;           // usado no create
+  estoque?: number;
   idCategoria?: number | null;
   ativo?: boolean;
 }
 
 interface AtualizarProdutoDTO {
-  usuarioId: number;          // vendedor logado
+  usuarioId: number;
   produtoId: number;
   nome: string;
   preco: number;
@@ -27,8 +26,8 @@ interface AtualizarProdutoDTO {
 
 class ProdutoService {
   async getById(id: number) {
-    const produto = await prisma.produto.findUnique({
-      where: { id },
+    const produto = await prisma.produto.findFirst({
+      where: { id, ativo: true },
       include: {
         loja: {
           select: {
@@ -48,14 +47,15 @@ class ProdutoService {
 
   async listarPorLoja(lojaId: number) {
     return prisma.produto.findMany({
-      where: { lojaId },
+      where: { lojaId, ativo: true },
       orderBy: { id: 'desc' },
     });
   }
 
-  // listar TODOS os produtos (home / busca)
   async listarTodos(search?: string) {
-    const where: Prisma.ProdutoWhereInput = {};
+    const where: Prisma.ProdutoWhereInput = {
+      ativo: true,
+    };
 
     if (search && search.trim().length > 0) {
       where.nome = {
@@ -81,19 +81,15 @@ class ProdutoService {
       args.take = 20;
     }
 
-    const produtos = await prisma.produto.findMany(args);
-    return produtos;
+    return prisma.produto.findMany(args);
   }
 
-  // criar produto para a loja do vendedor logado
   async criarParaVendedor(data: CriarProdutoDTO) {
     const usuario = await prisma.usuario.findUnique({
       where: { id: data.usuarioId },
     });
 
-    if (!usuario) {
-      throw new Error('Usuário não encontrado');
-    }
+    if (!usuario) throw new Error('Usuário não encontrado');
 
     if (usuario.tipo !== 'VENDEDOR') {
       throw new Error('Apenas usuários do tipo VENDEDOR podem cadastrar produtos');
@@ -117,11 +113,7 @@ class ProdutoService {
         lojaId: loja.id,
         ...(data.descricao !== undefined && { descricao: data.descricao }),
         ...(data.imagemUrl !== undefined && { imagemUrl: data.imagemUrl }),
-
-        // estoque respeita o valor vindo do front (ou 0 se não vier)
         estoque: estoqueNormalizado,
-
-        // se tiver idCategoria e ativo (schema atualizado), também aplica
         ...(data.idCategoria !== undefined && { idCategoria: data.idCategoria }),
         ...(typeof data.ativo === 'boolean' && { ativo: data.ativo }),
       },
@@ -154,7 +146,6 @@ class ProdutoService {
     return true;
   }
 
-  // listar produtos da loja do vendedor logado
   async listarDoVendedor(usuarioId: number) {
     const loja = await prisma.loja.findUnique({
       where: { usuarioId },
@@ -172,27 +163,15 @@ class ProdutoService {
     return { loja, produtos };
   }
 
-  // atualizar produto da loja do vendedor logado
   async atualizarParaVendedor(data: AtualizarProdutoDTO) {
-    const {
-      usuarioId,
-      produtoId,
-      nome,
-      preco,
-      descricao,
-      imagemUrl,
-      estoque,
-      idCategoria,
-      ativo,
-    } = data;
+    const { usuarioId, produtoId, nome, preco, descricao, imagemUrl, estoque, idCategoria, ativo } =
+      data;
 
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
     });
 
-    if (!usuario) {
-      throw new Error('Usuário não encontrado');
-    }
+    if (!usuario) throw new Error('Usuário não encontrado');
 
     if (usuario.tipo !== 'VENDEDOR') {
       throw new Error('Apenas usuários do tipo VENDEDOR podem editar produtos');
@@ -217,7 +196,7 @@ class ProdutoService {
       throw new Error('Produto não encontrado para este vendedor');
     }
 
-    const produtoAtualizado = await prisma.produto.update({
+    return prisma.produto.update({
       where: { id: produtoId },
       data: {
         nome,
@@ -229,8 +208,6 @@ class ProdutoService {
         ...(ativo !== undefined && { ativo }),
       },
     });
-
-    return produtoAtualizado;
   }
 }
 

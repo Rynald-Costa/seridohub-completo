@@ -3,23 +3,19 @@ import { UserType } from '@prisma/client';
 import AuthService from '../services/AuthService';
 
 class AuthController {
-    async checkEmail(req: Request, res: Response) {
+  async checkEmail(req: Request, res: Response) {
     try {
       const { email } = req.body;
 
       if (!email) {
-        return res
-          .status(400)
-          .json({ message: 'E-mail é obrigatório' });
+        return res.status(400).json({ message: 'E-mail é obrigatório' });
       }
 
       const result = await AuthService.checkEmail(email);
       return res.json(result);
     } catch (error: any) {
       console.error('Erro em checkEmail:', error);
-      return res
-        .status(500)
-        .json({ message: 'Erro ao verificar e-mail' });
+      return res.status(500).json({ message: 'Erro ao verificar e-mail' });
     }
   }
 
@@ -33,7 +29,6 @@ class AuthController {
           .json({ message: 'Nome, e-mail e senha são obrigatórios' });
       }
 
-      // monta o payload básico
       const payload: {
         nome: string;
         email: string;
@@ -47,7 +42,6 @@ class AuthController {
         telefone,
       };
 
-      // só adiciona "tipo" se veio algo no body
       if (tipo) {
         payload.tipo = tipo as UserType;
       }
@@ -67,7 +61,6 @@ class AuthController {
     }
   }
 
-  // o resto (login / me) pode ficar como estava
   async login(req: Request, res: Response) {
     try {
       const { email, senha } = req.body;
@@ -90,9 +83,32 @@ class AuthController {
         return res.status(401).json({ message: error.message });
       }
 
+      return res.status(500).json({ message: 'Erro interno ao fazer login' });
+    }
+  }
+
+  async adminLogin(req: Request, res: Response) {
+    try {
+      const { email, senha } = req.body;
+
+      if (!email || !senha) {
+        return res
+          .status(400)
+          .json({ message: 'E-mail e senha são obrigatórios' });
+      }
+
+      const result = await AuthService.adminLogin(email, senha);
+      return res.json(result);
+    } catch (error: any) {
+      console.error('Erro em adminLogin:', error);
+
+      if (error?.message === 'Credenciais inválidas') {
+        return res.status(401).json({ message: error.message });
+      }
+
       return res
         .status(500)
-        .json({ message: 'Erro interno ao fazer login' });
+        .json({ message: 'Erro interno ao fazer login de admin' });
     }
   }
 

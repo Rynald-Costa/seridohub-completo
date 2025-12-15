@@ -1,4 +1,3 @@
-// src/controllers/ProdutoController.ts
 import { Request, Response } from 'express';
 import ProdutoService from '../services/ProdutoService';
 
@@ -32,16 +31,12 @@ class ProdutoController {
       return res.json(produtos);
     } catch (error: any) {
       console.error(error);
-      return res
-        .status(500)
-        .json({ message: 'Erro ao listar produtos da loja' });
+      return res.status(500).json({ message: 'Erro ao listar produtos da loja' });
     }
   }
 
-  // ✅ GET /api/produtos → lista geral de produtos (para home)
   async listAll(req: Request, res: Response) {
     try {
-      // pega ?search=Pizza, se vier
       const searchParam = req.query.search;
       const search =
         typeof searchParam === 'string' && searchParam.trim().length > 0
@@ -56,7 +51,6 @@ class ProdutoController {
     }
   }
 
-  // POST /api/produtos (vendedor) → cria novo produto
   async createForSeller(req: Request, res: Response) {
     try {
       const userId = (req as any).user?.id as number | undefined;
@@ -65,28 +59,17 @@ class ProdutoController {
         return res.status(401).json({ message: 'Não autenticado' });
       }
 
-      const {
-        nome,
-        preco,
-        descricao,
-        imagemUrl,
-        estoque,
-        idCategoria,
-        ativo,
-      } = req.body;
+      const { nome, preco, descricao, imagemUrl, estoque, idCategoria, ativo } = req.body;
 
       if (!nome || typeof nome !== 'string') {
-        return res
-          .status(400)
-          .json({ message: 'Nome do produto é obrigatório' });
+        return res.status(400).json({ message: 'Nome do produto é obrigatório' });
       }
 
       const precoNumber = Number(preco);
-      if (!preco || Number.isNaN(precoNumber) || precoNumber <= 0) {
+      if (preco === undefined || preco === null || Number.isNaN(precoNumber) || precoNumber <= 0) {
         return res.status(400).json({ message: 'Preço inválido' });
       }
 
-      // --------- ESTOQUE ----------
       let estoqueNumber = 0;
       if (estoque !== undefined && estoque !== null && estoque !== '') {
         estoqueNumber = Number(estoque);
@@ -97,7 +80,6 @@ class ProdutoController {
         }
       }
 
-      // --------- CATEGORIA (sempre number | null) ----------
       let idCategoriaNumber: number | null = null;
       if (idCategoria !== undefined && idCategoria !== null && idCategoria !== '') {
         const parsed = Number(idCategoria);
@@ -107,7 +89,6 @@ class ProdutoController {
         idCategoriaNumber = parsed;
       }
 
-      // --------- ATIVO ----------
       const ativoFlag = typeof ativo === 'boolean' ? ativo : true;
 
       const produto = await ProdutoService.criarParaVendedor({
@@ -117,16 +98,14 @@ class ProdutoController {
         descricao,
         imagemUrl,
         estoque: estoqueNumber,
-        idCategoria: idCategoriaNumber, // <- number | null, nunca undefined
+        idCategoria: idCategoriaNumber,
         ativo: ativoFlag,
       });
 
       return res.status(201).json(produto);
     } catch (error: any) {
       console.error(error);
-      return res
-        .status(400)
-        .json({ message: error.message || 'Erro ao cadastrar produto' });
+      return res.status(400).json({ message: error.message || 'Erro ao cadastrar produto' });
     }
   }
 
@@ -144,18 +123,13 @@ class ProdutoController {
       }
 
       await ProdutoService.removerDoVendedor(userId, produtoId);
-
-      // 204 = sucesso, sem corpo
       return res.status(204).send();
     } catch (error: any) {
       console.error(error);
-      return res
-        .status(400)
-        .json({ message: error.message || 'Erro ao remover produto' });
+      return res.status(400).json({ message: error.message || 'Erro ao remover produto' });
     }
   }
 
-  // GET /api/produtos/minha-loja (vendedor)
   async listMine(req: Request, res: Response) {
     try {
       const userId = (req as any).user?.id as number | undefined;
@@ -168,13 +142,10 @@ class ProdutoController {
       return res.json(result);
     } catch (error: any) {
       console.error(error);
-      return res
-        .status(400)
-        .json({ message: error.message || 'Erro ao listar produtos' });
+      return res.status(400).json({ message: error.message || 'Erro ao listar produtos' });
     }
   }
 
-  // ✅ PUT /api/produtos/:id (vendedor) → atualizar produto da loja do vendedor logado
   async updateForSeller(req: Request, res: Response) {
     try {
       const userId = (req as any).user?.id as number | undefined;
@@ -187,46 +158,52 @@ class ProdutoController {
         return res.status(400).json({ message: 'ID do produto inválido' });
       }
 
-      const {
-        nome,
-        descricao,
-        preco,
-        estoque,
-        imagemUrl,
-        idCategoria,
-        ativo,
-      } = req.body;
+      const { nome, descricao, preco, estoque, imagemUrl, idCategoria, ativo } = req.body;
 
       if (!nome || typeof nome !== 'string') {
-        return res
-          .status(400)
-          .json({ message: 'Nome do produto é obrigatório' });
+        return res.status(400).json({ message: 'Nome do produto é obrigatório' });
       }
 
       const precoNumber = Number(preco);
-      if (!preco && preco !== 0 || Number.isNaN(precoNumber) || precoNumber <= 0) {
+      if (preco === undefined || preco === null || Number.isNaN(precoNumber) || precoNumber <= 0) {
         return res.status(400).json({ message: 'Preço inválido' });
       }
 
-      const estoqueNumber = Number(estoque);
-      if (Number.isNaN(estoqueNumber) || estoqueNumber < 0) {
-        return res
-          .status(400)
-          .json({ message: 'Estoque inválido (deve ser zero ou maior)' });
+      let estoqueNumber: number | undefined = undefined;
+      if (estoque !== undefined && estoque !== null && estoque !== '') {
+        const parsed = Number(estoque);
+        if (Number.isNaN(parsed) || parsed < 0) {
+          return res
+            .status(400)
+            .json({ message: 'Estoque inválido (deve ser zero ou maior)' });
+        }
+        estoqueNumber = parsed;
       }
 
-      const produtoAtualizado = await ProdutoService.atualizarParaVendedor({
+      const dto: {
+        usuarioId: number;
+        produtoId: number;
+        nome: string;
+        preco: number;
+        descricao?: string | null;
+        imagemUrl?: string | null;
+        estoque?: number;
+        idCategoria?: number | null;
+        ativo?: boolean;
+      } = {
         usuarioId: userId,
         produtoId: id,
         nome,
-        descricao,
         preco: precoNumber,
-        estoque: estoqueNumber,
         imagemUrl,
         idCategoria,
         ativo,
-      });
+      };
 
+      if (descricao !== undefined) dto.descricao = descricao;
+      if (estoqueNumber !== undefined) dto.estoque = estoqueNumber;
+
+      const produtoAtualizado = await ProdutoService.atualizarParaVendedor(dto);
       return res.json(produtoAtualizado);
     } catch (error: any) {
       console.error(error);
@@ -238,9 +215,7 @@ class ProdutoController {
         return res.status(404).json({ message: error.message });
       }
 
-      return res
-        .status(400)
-        .json({ message: error.message || 'Erro ao atualizar produto' });
+      return res.status(400).json({ message: error.message || 'Erro ao atualizar produto' });
     }
   }
 }

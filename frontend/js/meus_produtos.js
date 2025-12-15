@@ -1,6 +1,4 @@
-// frontend/js/meus_produtos.js
-
-let PRODUTOS_VENDEDOR = []; // cache em memória para filtros/edição
+let PRODUTOS_VENDEDOR = [];
 let TOKEN_ATUAL = null;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -45,7 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Inicializa toda a página
   initProdutosPage(token);
   setupPreviewInput();
 });
@@ -57,11 +54,8 @@ function initProdutosPage(token) {
   carregarProdutos(token);
 }
 
-/* ------------------------------------------------------------------
-   MODAL / FORMULÁRIO DE PRODUTO (criação + edição)
-   ------------------------------------------------------------------ */
 function setupPreviewInput() {
-  const urlInput = document.getElementById('produto-imagem'); // <- id do campo
+  const urlInput = document.getElementById('produto-imagem');
   const img      = document.getElementById('produto-preview-img');
   const placeholder = document.getElementById('produto-preview-placeholder');
 
@@ -71,21 +65,18 @@ function setupPreviewInput() {
     const url = urlInput.value.trim();
 
     if (!url) {
-      // sem URL → esconde imagem, mostra placeholder
       img.src = '';
       img.classList.add('d-none');
       placeholder.classList.remove('d-none');
       return;
     }
 
-    // tenta carregar a imagem
     img.onload = () => {
       img.classList.remove('d-none');
       placeholder.classList.add('d-none');
     };
 
     img.onerror = () => {
-      // se a URL for inválida, volta pro placeholder
       img.src = '';
       img.classList.add('d-none');
       placeholder.classList.remove('d-none');
@@ -94,11 +85,9 @@ function setupPreviewInput() {
     img.src = url;
   };
 
-  // atualiza enquanto digita e quando perde o foco
   urlInput.addEventListener('input', updatePreview);
   urlInput.addEventListener('change', updatePreview);
 
-  // se o modal abrir já com um valor preenchido, você pode chamar isso
   updatePreview();
 }
 
@@ -176,7 +165,6 @@ function setupFormProduto(token) {
       descricao: descricao || undefined,
       preco,
       estoque,
-      // nomes compatíveis com o que você já tinha no back
       imagemUrl: imagemUrl || undefined,
       idCategoria: idCategoria || undefined,
       ativo,
@@ -225,7 +213,6 @@ function setupFormProduto(token) {
           : "Produto cadastrado com sucesso!";
       }
 
-      // fecha o modal depois de um pequeno delay visual
       setTimeout(() => {
         const modalEl = document.getElementById("produtoModal");
         if (
@@ -238,7 +225,6 @@ function setupFormProduto(token) {
         }
       }, 300);
 
-      // recarrega lista
       carregarProdutos(token);
     } catch (err) {
       console.error(err);
@@ -250,10 +236,6 @@ function setupFormProduto(token) {
     }
   });
 }
-
-/* ------------------------------------------------------------------
-   CARREGAR PRODUTOS E PREPARAR LISTA / FILTROS
-   ------------------------------------------------------------------ */
 
 async function carregarProdutos(token) {
   const list = document.getElementById("produtos-vendedor-list");
@@ -296,7 +278,6 @@ async function carregarProdutos(token) {
         : "(nenhum produto cadastrado ainda)";
     }
 
-    // Preenche select de categorias com base nos produtos carregados (se houver)
     preencherCategoriasFiltroEForm(PRODUTOS_VENDEDOR);
 
     if (!PRODUTOS_VENDEDOR.length) {
@@ -304,7 +285,6 @@ async function carregarProdutos(token) {
       return;
     }
 
-    // renderiza a lista considerando filtros atuais
     aplicarFiltrosEListagem(loja);
   } catch (err) {
     console.error(err);
@@ -370,7 +350,6 @@ function preencherCategoriasFiltroEForm(produtos) {
       select.appendChild(opt);
     });
 
-    // tenta manter seleção anterior, se ainda existir
     if (valorAtual && select.querySelector(`option[value="${valorAtual}"]`)) {
       select.value = valorAtual;
     }
@@ -379,10 +358,6 @@ function preencherCategoriasFiltroEForm(produtos) {
   preencher(filtroSelect, true);
   preencher(formSelect, false);
 }
-
-/* ------------------------------------------------------------------
-   LISTAGEM + FILTROS
-   ------------------------------------------------------------------ */
 
 function setupFiltros() {
   const buscaInput = document.getElementById("filtro-busca-produto");
@@ -411,7 +386,6 @@ function setupFiltros() {
     });
   }
 
-  // Delegação de eventos para Editar / Remover
   if (list) {
     list.addEventListener("click", (ev) => {
       const editarBtn = ev.target.closest(".produto-editar-btn");
@@ -437,8 +411,6 @@ function aplicarFiltrosEListagem(lojaFromFetch = null) {
 
   if (!list) return;
 
-  // esconde empty state de "nenhum produto" na listagem filtrada,
-  // ele só aparece quando realmente não existe produto algum.
   if (empty && PRODUTOS_VENDEDOR.length) {
     empty.classList.add("d-none");
   }
@@ -447,10 +419,9 @@ function aplicarFiltrosEListagem(lojaFromFetch = null) {
   const categoriaFiltro = categoriaSelect?.value || "";
   const statusFiltro = statusSelect?.value || "";
 
-  const loja = lojaFromFetch || null; // apenas para label "Loja" se quiser usar
+  const loja = lojaFromFetch || null; 
 
   const filtrados = PRODUTOS_VENDEDOR.filter((p) => {
-    // busca por nome / descrição
     if (textoBusca) {
       const nome = (p.nome || "").toLowerCase();
       const desc = (p.descricao || "").toLowerCase();
@@ -459,14 +430,12 @@ function aplicarFiltrosEListagem(lojaFromFetch = null) {
       }
     }
 
-    // filtro de categoria
     if (categoriaFiltro) {
       const idCat =
         p.idCategoria ?? p.id_categoria ?? p.categoriaId ?? "";
       if (String(idCat) !== String(categoriaFiltro)) return false;
     }
 
-    // filtro de status
     if (statusFiltro) {
       const ativo = !!p.ativo;
       if (statusFiltro === "ativo" && !ativo) return false;
@@ -585,10 +554,6 @@ function aplicarFiltrosEListagem(lojaFromFetch = null) {
     .join("");
 }
 
-/* ------------------------------------------------------------------
-   EDIÇÃO E REMOÇÃO
-   ------------------------------------------------------------------ */
-
 function abrirEdicaoProduto(id) {
   if (!id) return;
   const produto = PRODUTOS_VENDEDOR.find(
@@ -640,7 +605,6 @@ function abrirEdicaoProduto(id) {
 
   if (ativoInput) ativoInput.checked = !!produto.ativo;
 
-  // atualiza preview da imagem se o script inline estiver carregado
   const evt = new Event("change");
   if (imagemInput) imagemInput.dispatchEvent(evt);
 
@@ -663,13 +627,11 @@ async function removerProduto(id) {
       },
     });
 
-    // como o back retorna 204, normalmente não há JSON
     let data = null;
     if (resp.status !== 204) {
       try {
         data = await resp.json();
       } catch (e) {
-        // se não tiver corpo, só ignora
         data = null;
       }
     }
@@ -680,22 +642,16 @@ async function removerProduto(id) {
       return;
     }
 
-    // sucesso: remove do cache local
     PRODUTOS_VENDEDOR = PRODUTOS_VENDEDOR.filter(
       (p) => String(p.id) !== String(id)
     );
 
-    // re-renderiza listagem com filtros atuais
     aplicarFiltrosEListagem();
   } catch (err) {
     console.error(err);
     alert("Erro de conexão ao remover produto.");
   }
 }
-
-/* ------------------------------------------------------------------
-   UTIL
-   ------------------------------------------------------------------ */
 
 function escapeHtml(str) {
   if (!str) return "";

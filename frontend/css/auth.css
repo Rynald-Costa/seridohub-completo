@@ -1,16 +1,13 @@
-/* frontend/css/auth.css */
-
 html,
+
 body {
   height: 100%;
 }
 
 body {
-  background-color: #fffaf0; /* fundo creme, bem claro */
+  background-color: #fffaf0; 
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
-
-  /* mantém header em cima e footer no fim da tela */
   display: flex;
   flex-direction: column;
 }
@@ -21,26 +18,23 @@ main {
   align-items: center;
 }
 
-/* imagem de logo no header (classe usada no header_public) */
 .logo-header-img {
   height: 80px;
   width: auto;
   object-fit: contain;
 }
 
-/* card da tela de login */
 .login-card {
   max-width: 420px;
   margin: 0 auto;
 }
 
-/* card da tela de cadastro */
 .cadastro-card {
   max-width: 480px;
   margin: 0 auto;
 }
 
-/* círculo com a logo grande à direita */
+
 .promo-logo {
   width: 240px;
   height: 240px;

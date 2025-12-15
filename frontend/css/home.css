@@ -1,5 +1,3 @@
-/* frontend/css/home.css */
-
 html,
 body {
   height: 100%;
@@ -13,21 +11,17 @@ body {
   flex-direction: column;
 }
 
-/* HEADER vem dos partials; só estilizamos o conteúdo da home */
-
 main {
   flex: 1;
   display: flex;
   align-items: stretch;
 }
 
-/* Container geral da home */
 .home-wrapper {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-/* HERO / BOAS-VINDAS */
 .hero-card {
   background: linear-gradient(135deg, #ffc107, #ffe9a3);
   border: 0;
@@ -49,7 +43,6 @@ main {
   letter-spacing: 0.06em;
 }
 
-/* Banner principal (tipo carrossel) */
 .promo-banner {
   border-radius: 20px;
   background: linear-gradient(135deg, #111827, #0f172a);
@@ -101,7 +94,6 @@ main {
   filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.4));
 }
 
-/* Seções de cartões */
 .section-title {
   font-size: 1.1rem;
   font-weight: 600;
@@ -149,7 +141,6 @@ main {
   color: #6c757d;
 }
 
-/* Cards de produtos / lojas */
 .product-card {
   border-radius: 16px;
   border: 0;
@@ -175,7 +166,6 @@ main {
   padding: 0.1rem 0.5rem;
 }
 
-/* Grade de 5 cartões tipo marketplace */
 .grid-scroll {
   overflow-x: auto;
   padding-bottom: 0.25rem;
@@ -217,7 +207,7 @@ main {
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
   background: #ffffff;
-  max-width: 900px;          /* ocupa bem o centro */
+  max-width: 900px;
 }
 
 .loja-carousel-logo-col {
@@ -254,7 +244,6 @@ main {
   max-width: 480px;
 }
 
-/* em telas pequenas, tira a borda vertical e reduz tamanho da logo */
 @media (max-width: 767.98px) {
   .loja-carousel-card {
     border-radius: 0;
@@ -274,16 +263,10 @@ main {
   }
 }
 
-/* ============================================================
-   DASHBOARD DO VENDEDOR
-   ============================================================ */
-
-/* leve respiro extra pra separar do conteúdo de cliente */
 #vendedor-home {
   margin-top: 0.5rem;
 }
 
-/* highlight do estado "sem loja" com cara de call-to-action */
 .vendedor-highlight-card {
   background: linear-gradient(135deg, #ffe169, #fff7d6);
   border-radius: 20px;
@@ -310,7 +293,6 @@ main {
   opacity: 0.9;
 }
 
-/* cards principais do painel */
 .card-dashboard {
   border-radius: 20px;
   border: 0;
@@ -345,7 +327,6 @@ main {
   opacity: 1;
 }
 
-/* círculo com ícone do card */
 .dashboard-icon-circle {
   width: 42px;
   height: 42px;
@@ -362,7 +343,6 @@ main {
   font-weight: 600;
 }
 
-/* bloco de estatística */
 .dashboard-stat {
   padding: 0.6rem 0.8rem;
   border-radius: 14px;
@@ -383,7 +363,6 @@ main {
   color: #111827;
 }
 
-/* links de configurações rápidas */
 .dashboard-quick-actions button {
   font-size: 0.85rem;
   color: #0d6efd;
@@ -402,7 +381,6 @@ main {
   text-decoration: underline;
 }
 
-/* destaque leve para o botão do card de Produtos */
 #vendedor-home #btn-dashboard-produtos-unificado {
   box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.25);
 }
@@ -411,7 +389,6 @@ main {
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
 }
 
-/* responsivo: deixar os cards com mais respiro no mobile */
 @media (max-width: 767.98px) {
   #vendedor-home .card-dashboard {
     border-radius: 16px;
@@ -421,10 +398,6 @@ main {
     margin-bottom: 0.25rem;
   }
 }
-
-/* ============================================================
-   PÁGINA "MINHA LOJA" (vendedor)
-   ============================================================ */
 
 .store-page {
   background: #f3f4f6;
@@ -447,7 +420,6 @@ main {
   font-size: 0.85rem;
 }
 
-/* cards principais */
 .store-form-card,
 .store-tips-card {
   border-radius: 20px;
@@ -464,7 +436,6 @@ main {
   padding: 1.25rem 1.4rem;
 }
 
-/* cabeçalho do formulário */
 .store-form-header {
   display: flex;
   justify-content: space-between;
@@ -478,7 +449,6 @@ main {
   font-weight: 600;
 }
 
-/* preview da logo */
 .store-logo-preview {
   margin-top: 0.25rem;
 }
@@ -515,7 +485,6 @@ main {
   object-fit: contain;
 }
 
-/* tag no topo do card de dicas */
 .store-tips-card .badge {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -529,10 +498,6 @@ main {
     padding: 1.25rem;
   }
 }
-
-/* ============================================================
-   LISTA DE "MEUS PRODUTOS" (vendedor)
-   ============================================================ */
 
 .produtos-filtro-bar select,
 .produtos-filtro-bar input[type="search"] {
@@ -569,7 +534,6 @@ main {
   max-width: 340px;
 }
 
-/* coluna direita do item */
 .produto-info-acoes {
   min-width: 170px;
 }
@@ -578,16 +542,12 @@ main {
   font-size: 0.7rem;
 }
 
-/* ==========================
-   MODAL DE PRODUTO - PRÉVIA
-   ========================== */
-
 .modal-produto .modal-dialog {
-  max-width: 720px;               /* modal não fica gigante */
+  max-width: 720px;
 }
 
 .modal-produto .modal-body {
-  max-height: 75vh;               /* se passar da tela, vira scroll */
+  max-height: 75vh;
   overflow-y: auto;
 }
 
@@ -599,19 +559,19 @@ main {
 }
 
 .product-preview-inner {
-  height: 220px;                  /* altura fixa da caixinha */
+  height: 220px;
   border-radius: 10px;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;               /* corta qualquer coisa que ultrapasse */
+  overflow: hidden;
 }
 
 .product-preview-img {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;            /* encaixa a imagem dentro da área */
+  object-fit: contain;
   display: block;
 }
 
